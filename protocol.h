@@ -24,6 +24,13 @@ typedef enum {
     RPL_SEND_MSG    = 0x0107
 } MessageType;
 
+typedef struct {
+    int valid;
+    MessageType type;
+    // Human readable string as the content
+    char *content;
+} Message;
+
 #define PROTOCOL_HEADER_LEN 8
 
 // To test if the input is of our protocol
@@ -42,3 +49,6 @@ int request_hostname_msg(unsigned char *dest);
 int reply_time_msg(unsigned char *dest);
 // Write hostname reply message to dest
 int reply_hostname_msg(unsigned char *dest, const unsigned char *src);
+
+
+Message interpret_raw_msg(const unsigned char *src);
