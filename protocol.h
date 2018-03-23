@@ -1,7 +1,7 @@
 // This file includes the custom protocol used in the experiment
+
 // Note that the protocol transmits in big endian
 // Below is the definition of our protocol: 
-
 // Protocol format
 // HEX  || BE EF |             |       |
 // byte || -- -- | -- -- -- -- | -- -- | --...
@@ -27,18 +27,18 @@ typedef enum {
 #define PROTOCOL_HEADER_LEN 8
 
 // To test if the input is of our protocol
-int is_custom_protocol(const char *buf);
+int is_custom_protocol(const unsigned char *buf);
 // Get length of the body
-int get_body_length(const char *buf);
+int get_body_length(const unsigned char *buf);
 // Get message type
-MessageType get_msg_type(const char *buf);
+MessageType get_msg_type(const unsigned char *buf);
 
 // Write time request message to dest
-int request_time_msg(char *dest);
+int request_time_msg(unsigned char *dest);
 // Write hostname request message to dest
-int request_hostname(char *dest);
+int request_hostname_msg(unsigned char *dest);
 
 // Write time reply message to dest
-int reply_time_msg(char *dest);
+int reply_time_msg(unsigned char *dest);
 // Write hostname reply message to dest
-int reply_hostname(char *dest, const char *src);
+int reply_hostname_msg(unsigned char *dest, const unsigned char *src);

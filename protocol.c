@@ -16,26 +16,26 @@
 const uint16_t MAGIC = 0xBEEF;
 
 // To test if the input is of our protocol
-int is_custom_protocol(const char *buf)
+int is_custom_protocol(const unsigned char *buf)
 {
     if(*(uint16_t*)(buf) == htons(MAGIC)) return 1;
     return 0;
 }
 
 // Get length of the body
-int get_body_length(const char *buf)
+int get_body_length(const unsigned char *buf)
 {
     return ntohl(*(uint32_t*)(buf + 2));
 }
 
 // Get message type
-MessageType get_msg_type(const char *buf)
+MessageType get_msg_type(const unsigned char *buf)
 {
     return ntohs(*(uint16_t*)(buf + 6));
 }
 
 // Write time request message to dest
-int request_time_msg(char *dest)
+int request_time_msg(unsigned char *dest)
 {
     // Write magic
     *(uint16_t*)(dest)       = htons(MAGIC);
@@ -47,7 +47,7 @@ int request_time_msg(char *dest)
 }
 
 // Write hostname request message to dest
-int request_hostname(char *dest)
+int request_hostname_msg(unsigned char *dest)
 {
     // Write magic
     *(uint16_t*)(dest)       = htons(MAGIC);
@@ -59,7 +59,7 @@ int request_hostname(char *dest)
 }
 
 // Write time reply message to dest
-int reply_time_msg(char *dest)
+int reply_time_msg(unsigned char *dest)
 {
     int now = time(NULL);
     // Write magic
@@ -74,15 +74,15 @@ int reply_time_msg(char *dest)
 }
 
 // Write hostname reply message to dest
-int reply_hostname(char *dest, const char *src)
+int reply_hostname_msg(unsigned char *dest, const unsigned char *src)
 {
     // Write magic
     *(uint16_t*)(dest)       = htons(MAGIC);
     // Write body length
-    *(uint32_t*)(dest + 2)   = htonl(strlen(src));
+    *(uint32_t*)(dest + 2)   = htonl(strlen((char*)src));
     // Write type
     *(uint16_t*)(dest + 6)   = htons(RPL_HOSTNAME);
     // Write body
-    strcpy(dest + 8, src);
+    strcpy((char*)(dest + 8), (char*)src);
     return 0;
 }
