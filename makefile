@@ -7,3 +7,7 @@ server: protocol.o server.o
 all: server
 
 server.o: server.c server.h protocol.c protocol.h
+
+.PHONY: clean
+clean:
+	rm -f *.o server

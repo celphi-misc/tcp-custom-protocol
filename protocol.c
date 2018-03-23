@@ -1,6 +1,8 @@
 #include "protocol.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -63,11 +65,11 @@ int reply_time_msg(char *dest)
     // Write magic
     *(uint16_t*)(dest)       = htons(MAGIC);
     // Write body length
-    *(uint32_t*)(dest + 2)   = utonl(sizeof(now));
+    *(uint32_t*)(dest + 2)   = htonl(sizeof(now));
     // Write type
     *(uint16_t*)(dest + 6)   = htons(RPL_TIME);
     // Write body
-    *(int32_t*)(dest + 8)    = utonl(now);
+    *(int32_t*)(dest + 8)    = htonl(now);
     return 0;
 }
 
@@ -77,7 +79,7 @@ int reply_hostname(char *dest, const char *src)
     // Write magic
     *(uint16_t*)(dest)       = htons(MAGIC);
     // Write body length
-    *(uint32_t*)(dest + 2)   = utonl(strlen(src));
+    *(uint32_t*)(dest + 2)   = htonl(strlen(src));
     // Write type
     *(uint16_t*)(dest + 6)   = htons(RPL_HOSTNAME);
     // Write body
