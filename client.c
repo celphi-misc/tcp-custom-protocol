@@ -25,6 +25,26 @@ char hostname[CLIENT_NAME_LENGTH];
  * int port         : default port number to the server
  * return an exit code
  **/        
+int new_socket(int* socket_desc, int port);
+
+// initialize client name and host name
+int init();
+
+int main() 
+{
+    int exit_code;
+    // Initialize client name
+    if((exit_code = init()) != SUCCEED_EXITCODE) return exit_code;
+    
+    int socket_desc;
+    if((exit_code = new_socket(&socket_desc, PORT)) != SUCCEED_EXITCODE) return exit_code;
+
+    // TODO: CLI-design & recv implementation
+    // show welcome interface
+    show_welcome();
+    return 0;
+}
+
 int new_socket(int* socket_desc, int port)
 {
     if((*socket_desc = socket(AF_INET, SOCK_STREAM, 0)) == -1)
@@ -55,17 +75,4 @@ int init()
         return FAILED_CLIENT_NAME_UNCONFIG;
     strcpy(hostname, clientname);
     return SUCCEED_EXITCODE;
-}
-
-int main() 
-{
-    int exit_code;
-    // Initialize client name
-    if((exit_code = init()) != SUCCEED_EXITCODE) return exit_code;
-    
-    int socket_desc;
-    if((exit_code = new_socket(&socket_desc, PORT)) != SUCCEED_EXITCODE) return exit_code;
-
-    // TODO: CLI-design & recv implementation
-    return 0;
 }
