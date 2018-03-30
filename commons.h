@@ -7,7 +7,10 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-#define MESSAGE_LENGTH 4096
+// Constants
+#define MESSAGE_LENGTH      4096
+#define HOSTNAME_LENGTH     2048
+#define READABLE_IP_LENGTH  17
 
 // Toggle server output
 #define SERVER_OUTPUT

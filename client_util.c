@@ -1,9 +1,20 @@
 #include "client_util.h"
 
 // Global variables of the client
-char clientname[CLIENT_NAME_LENGTH];
+char hostname[HOSTNAME_LENGTH];
+// Init flag
+int initialized;
 
-int flag = false;
+int init(void)
+{
+    if(!initialized) initialized = 1;
+    if(gethostname(hostname, HOSTNAME_LENGTH))
+        return FAILED_HOSTNAME;
+    return SUCCEED_EXITCODE;
+}
+
+// Create a new socket on the referred port number and IP address
+// TODO: Here here here
 
 // TODO: To be refactored
 #if 0
@@ -19,7 +30,7 @@ int init()
     strcpy(hostname, clientname);
     return SUCCEED_EXITCODE;
 }
-#endif
+
 
 int new_socket(int* socket_desc, int port)
 {
@@ -55,7 +66,6 @@ int new_socket(int* socket_desc, int port)
     return SUCCEED_EXITCODE;
 }
 
-#if 0
 void show_welcome() 
 {
     printf("+-----------------------------------------------+\n");
@@ -72,3 +82,4 @@ void show_welcome()
     printf("+-----------------------------------------------+\n");
 }
 #endif
+

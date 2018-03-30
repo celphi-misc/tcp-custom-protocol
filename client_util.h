@@ -3,13 +3,6 @@
 
 #include "commons.h"
 
-// Constants
-#define CLIENT_NAME_LENGTH 2048
-#define PORT 8888
-
-#define true 1
-#define false 0
-
 // Methods
 
 // initialize client name and host name

@@ -4,9 +4,6 @@
 
 #include "commons.h"
 
-// Constants
-#define HOSTNAME_LENGTH 2048
-
 // Methods
 
 // Create a new socket on the referred port number
