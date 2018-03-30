@@ -6,8 +6,8 @@
 #include <arpa/inet.h>
 
 // Constants
-const unsigned int CLIENT_NAME_LENGTH = 2048;
-const unsigned int PORT = 8888;
+#define CLIENT_NAME_LENGTH  2048
+#define PORT = 8888
 
 // Global variables of the client
 char clientname[CLIENT_NAME_LENGTH];
