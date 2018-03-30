@@ -1,11 +1,20 @@
 // This file includes the custom protocol used in the experiment
-
+#ifndef __CELPHI_PROTOCOL_H
+#define __CELPHI_PROTOCOL_H
 // Note that the protocol transmits in big endian
 // Below is the definition of our protocol: 
 // Protocol format
 // HEX  || BE EF |             |       |
 // byte || -- -- | -- -- -- -- | -- -- | --...
 // desc || Magic | Body Length | Type  | Body
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 
 typedef enum {
     REQ_TIME        = 0x0001,
@@ -52,3 +61,5 @@ int reply_hostname_msg(unsigned char *dest, const unsigned char *src);
 
 
 Message interpret_raw_msg(const unsigned char *src);
+
+#endif
