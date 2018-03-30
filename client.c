@@ -33,7 +33,7 @@ int new_socket(int* socket_desc, int port)
         socket_desc = NULL;
         return FAILED_SOCKET_CREATION;
     }
-    pust("Socket generated.");
+    puts("Socket generated.");
 
     struct sockaddr_in server;
     server.sin_family = AF_INET;
