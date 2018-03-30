@@ -18,7 +18,7 @@ char hostname[CLIENT_NAME_LENGTH];
 #define FAILED_CLIENT_NAME_UNCONFIG     -1
 #define FAILED_SOCKET_CREATION          -2
 #define FAILED_SOCKET_CONNECTION        -3
-#define FAILED_SERVER_NO_RESPONSE       
+#define FAILED_SERVER_NO_RESPONSE       -4
 
 /** Main routine of the client
  * int* socket_desc : a pointer of socket descriptor's id
