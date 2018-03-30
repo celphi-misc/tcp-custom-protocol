@@ -49,16 +49,23 @@ int get_body_length(const unsigned char *buf);
 // Get message type
 MessageType get_msg_type(const unsigned char *buf);
 
+//==== Protocol message generating functions ====
+// The return values of the functions are the number of bytes per message
+
 // Write time request message to dest
 int request_time_msg(unsigned char *dest);
-// Write hostname request message to dest
-int request_hostname_msg(unsigned char *dest);
-
 // Write time reply message to dest
 int reply_time_msg(unsigned char *dest);
+// Message to time
+// The return value is the Unix time in int
+int msg2time(unsigned char *src);
+
+// Write hostname request message to dest
+int request_hostname_msg(unsigned char *dest);
 // Write hostname reply message to dest
 int reply_hostname_msg(unsigned char *dest, const unsigned char *src);
-
+// Message to hostname
+int msg2hostname(unsigned char *dest, unsigned char *src);
 
 Message interpret_raw_msg(const unsigned char *src);
 

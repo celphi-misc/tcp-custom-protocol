@@ -14,4 +14,4 @@ server.o: server.c protocol.c
 
 .PHONY: clean
 clean:
-	rm -f *.o server
+	rm -f *.o server client test

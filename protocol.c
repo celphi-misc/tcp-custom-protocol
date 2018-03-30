@@ -28,6 +28,7 @@ MessageType get_msg_type(const unsigned char *buf)
 }
 
 // Write time request message to dest
+// The return value is the length of the whole message
 int request_time_msg(unsigned char *dest)
 {
     // Write magic
@@ -36,7 +37,7 @@ int request_time_msg(unsigned char *dest)
     *(uint32_t*)(dest + 2)   = 0;
     // Write type
     *(uint16_t*)(dest + 6)   = htons(REQ_TIME);
-    return 0;
+    return PROTOCOL_HEADER_LEN;
 }
 
 // Write hostname request message to dest
@@ -48,7 +49,7 @@ int request_hostname_msg(unsigned char *dest)
     *(uint32_t*)(dest + 2)   = 0;
     // Write type
     *(uint16_t*)(dest + 6)   = htons(REQ_HOSTNAME);
-    return 0;
+    return PROTOCOL_HEADER_LEN;
 }
 
 // Write time reply message to dest
@@ -62,8 +63,8 @@ int reply_time_msg(unsigned char *dest)
     // Write type
     *(uint16_t*)(dest + 6)   = htons(RPL_TIME);
     // Write body
-    *(int32_t*)(dest + 8)    = htonl(now);
-    return 0;
+    *(int32_t*)(dest + PROTOCOL_HEADER_LEN)    = htonl(now);
+    return PROTOCOL_HEADER_LEN + sizeof(now);
 }
 
 // Write hostname reply message to dest
@@ -76,6 +77,20 @@ int reply_hostname_msg(unsigned char *dest, const unsigned char *src)
     // Write type
     *(uint16_t*)(dest + 6)   = htons(RPL_HOSTNAME);
     // Write body
-    strcpy((char*)(dest + 8), (char*)src);
-    return 0;
+    strcpy((char*)(dest + PROTOCOL_HEADER_LEN), (char*)src);
+    return PROTOCOL_HEADER_LEN + strlen((char*)src);
+}
+
+// Convert the hostname reply message to real hostname
+int msg2hostname(unsigned char *dest, unsigned char *src)
+{
+    strncpy(dest, src + PROTOCOL_HEADER_LEN, get_body_length(src));
+    dest[get_body_length(src)] = 0;
+    return strlen(dest);
+}
+
+// Convert the time reply message to Unix time
+int msg2time(unsigned char *src)
+{
+    return ntohl(*(uint32_t*)(src + PROTOCOL_HEADER_LEN));
 }
