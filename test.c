@@ -1,17 +1,7 @@
-#include "protocol.h"
-#include <unistd.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
+#include "commons.h"
 
 // Constants
 #define HOSTNAME_LENGTH 2048
-#define MESSAGE_LENGTH  4096
-
-// Exit code definations
-#define SUCCEED_EXITCODE        0
-#define FAILED_HOSTNAME         -1
-#define FAILED_SOCKET_CREATION  -2
-#define FAILED_BINDING          -3
 
 // Global variables of the server
 char hostname[HOSTNAME_LENGTH];
@@ -82,9 +72,10 @@ int main(int argc, char **argv)
         int read_size;
         while( (read_size = recv(client_sock , client_message , 2000 , 0)) > 0 )
         {
-            printf("Read size: %d\n", read_size);
+            print_array_in_hex(client_message);
             //Send the message back to client
-            write(client_sock , client_message , strlen(client_message));
+            int message_len = reply_time_msg(client_message);
+            write(client_sock , client_message, message_len);
         }
     }
     reply_time_msg(buf);
