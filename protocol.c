@@ -63,7 +63,7 @@ int reply_time_msg(unsigned char *dest)
     // Write type
     *(uint16_t*)(dest + 6)   = htons(RPL_TIME);
     // Write body
-    *(int32_t*)(dest + 8)    = htonl(now);
+    *(int32_t*)(dest + PROTOCOL_HEADER_LEN)    = htonl(now);
     return PROTOCOL_HEADER_LEN + sizeof(now);
 }
 
@@ -77,6 +77,20 @@ int reply_hostname_msg(unsigned char *dest, const unsigned char *src)
     // Write type
     *(uint16_t*)(dest + 6)   = htons(RPL_HOSTNAME);
     // Write body
-    strcpy((char*)(dest + 8), (char*)src);
+    strcpy((char*)(dest + PROTOCOL_HEADER_LEN), (char*)src);
     return PROTOCOL_HEADER_LEN + strlen((char*)src);
+}
+
+// Convert the hostname reply message to real hostname
+int msg2hostname(unsigned char *dest, unsigned char *src)
+{
+    strncpy(dest, src + PROTOCOL_HEADER_LEN, get_body_length(src));
+    dest[get_body_length(src)] = 0;
+    return strlen(dest);
+}
+
+// Convert the time reply message to Unix time
+int msg2time(unsigned char *src)
+{
+    return ntohl(*(uint32_t*)(src + PROTOCOL_HEADER_LEN));
 }
