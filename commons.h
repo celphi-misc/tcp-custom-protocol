@@ -9,6 +9,9 @@
 
 #define MESSAGE_LENGTH 4096
 
+// Toggle server output
+#define SERVER_OUTPUT
+
 // Exit code definations
 #define SUCCEED_EXITCODE        0
 #define FAILED_HOSTNAME         -1

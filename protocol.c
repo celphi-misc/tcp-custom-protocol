@@ -8,6 +8,18 @@
 // Magic number of the protocol
 const uint16_t MAGIC = 0xBEEF;
 
+// Test use
+void print_array_in_hex(unsigned char *array)
+{
+    int len = ntohl(*(int*)(array + 2));
+    for(int i = 0; i < len + PROTOCOL_HEADER_LEN; i++)
+    {
+        printf("%2x ", array[i]);
+        if(i%16 == 15) puts("");
+    }
+    puts("");
+}
+
 // To test if the input is of our protocol
 int is_custom_protocol(const unsigned char *buf)
 {
@@ -82,7 +94,7 @@ int reply_hostname_msg(unsigned char *dest, const unsigned char *src)
 }
 
 // Convert the hostname reply message to real hostname
-int msg2hostname(unsigned char *dest, unsigned char *src)
+int msg2hostname(unsigned char *dest, const unsigned char *src)
 {
     strncpy(dest, src + PROTOCOL_HEADER_LEN, get_body_length(src));
     dest[get_body_length(src)] = 0;
@@ -90,7 +102,7 @@ int msg2hostname(unsigned char *dest, unsigned char *src)
 }
 
 // Convert the time reply message to Unix time
-int msg2time(unsigned char *src)
+int msg2time(const unsigned char *src)
 {
     return ntohl(*(uint32_t*)(src + PROTOCOL_HEADER_LEN));
 }

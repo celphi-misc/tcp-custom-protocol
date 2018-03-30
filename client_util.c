@@ -2,10 +2,11 @@
 
 // Global variables of the client
 char clientname[CLIENT_NAME_LENGTH];
-char hostname[HOST_NAME_LENGTH];
 
 int flag = false;
 
+// TODO: To be refactored
+#if 0
 int init() 
 {
     if(gethostname(clientname, CLIENT_NAME_LENGTH))
@@ -18,6 +19,7 @@ int init()
     strcpy(hostname, clientname);
     return SUCCEED_EXITCODE;
 }
+#endif
 
 int new_socket(int* socket_desc, int port)
 {
@@ -53,6 +55,7 @@ int new_socket(int* socket_desc, int port)
     return SUCCEED_EXITCODE;
 }
 
+#if 0
 void show_welcome() 
 {
     printf("+-----------------------------------------------+\n");
@@ -68,3 +71,4 @@ void show_welcome()
     printf("|  3. Exit: \tenter \"exit\" or \"e\".            |\n");
     printf("+-----------------------------------------------+\n");
 }
+#endif

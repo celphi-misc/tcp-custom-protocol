@@ -5,7 +5,6 @@
 
 // Constants
 #define CLIENT_NAME_LENGTH 2048
-#define HOST_NAME_LENGTH 2048
 #define PORT 8888
 
 #define true 1

@@ -1,9 +1,10 @@
 CC = gcc
 OPTIONS = -c
+SERVER_RECEIPE = protocol.o server_util.o server.o
 
 server: OPTIONS += -Wall
-server: protocol.o server.o
-	$(CC) -o server protocol.o server.o
+server: $(SERVER_RECEIPE)
+	$(CC) -o server $(SERVER_RECEIPE)
 test: protocol.o test.o
 	$(CC) -o test protocol.o test.o
 client: protocol.o client_test.o

@@ -13,5 +13,9 @@
 // The return value is either an error code (negative)
 // or a socket descriptor.
 int new_socket(uint16_t port);
+// The argument is the socket descriptor
+char* receive(int sock_desc, int *client_sock);
+// And this is the server thread routine
+void service(int client_sock, char* received);
 
 #endif

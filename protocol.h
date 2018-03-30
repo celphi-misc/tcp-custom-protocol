@@ -42,6 +42,9 @@ typedef struct {
 
 #define PROTOCOL_HEADER_LEN 8
 
+// This function is for test use
+void print_array_in_hex(unsigned char *array);
+
 // To test if the input is of our protocol
 int is_custom_protocol(const unsigned char *buf);
 // Get length of the body
@@ -58,14 +61,14 @@ int request_time_msg(unsigned char *dest);
 int reply_time_msg(unsigned char *dest);
 // Message to time
 // The return value is the Unix time in int
-int msg2time(unsigned char *src);
+int msg2time(const unsigned char *src);
 
 // Write hostname request message to dest
 int request_hostname_msg(unsigned char *dest);
 // Write hostname reply message to dest
 int reply_hostname_msg(unsigned char *dest, const unsigned char *src);
 // Message to hostname
-int msg2hostname(unsigned char *dest, unsigned char *src);
+int msg2hostname(unsigned char *dest, const unsigned char *src);
 
 Message interpret_raw_msg(const unsigned char *src);
 
