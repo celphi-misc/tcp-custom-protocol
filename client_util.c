@@ -64,6 +64,28 @@ int new_socket(uint16_t port, const char *ip_addr)
     return socket_desc;
 }
 
+// This the routine waiting for the remote server's reply
+// This function should run on a separate thread
+void receive_reply(const int socket_desc, const int output_desc)
+{
+    char recv_buffer[MESSAGE_LENGTH];
+    // Message buffer contains the human readable string of the received message
+    // Which is defined by the protocol
+    char mesg_buffer[MESSAGE_LENGTH];
+    while(recv(socket_desc, recv_buffer, MESSAGE_LENGTH, 0) > 0)
+    {
+        // The function below is provided by protocol.h
+        // which can convert the message to human readable string
+        int msg_type = interpret_raw_msg(mesg_buffer, recv_buffer);
+        // If you want some more features, the returned MessageType value
+        // can be useful.
+        // ==== To be implemented (optional) ====
+
+        // Here to write the string to the output device
+        write(output_desc, mesg_buffer, strlen(mesg_buffer) + 1);
+    }
+}
+
 // TODO:
 
 #if 0

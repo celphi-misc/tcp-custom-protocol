@@ -142,3 +142,9 @@ int msg2client_info(unsigned char *dest_hostname, struct sockaddr_in *dest_socka
     dest_hostname[body_length - 6] = 0;
     return body_length - 6;
 }
+
+// TODO: This function is to be implemented
+MessageType interpret_raw_msg(unsigned char *dest, const unsigned char *src)
+{
+    return 0;
+}
