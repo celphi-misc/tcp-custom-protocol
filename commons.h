@@ -26,5 +26,6 @@
 #define FAILED_SENDING          -5
 #define MAX_CLIENT_EXCEEDED     -6
 #define CLIENT_NOT_FOUND        -7
+#define UNKNOWN_PROTOCOL        -8
 
 #endif

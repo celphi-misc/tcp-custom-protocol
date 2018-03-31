@@ -79,7 +79,7 @@ int new_socket(uint16_t port)
 }
 
 // The argument is the socket descriptor
-char* receive(int sock_desc, int *client_sock)
+int accept_client(int sock_desc, int *client_sock)
 {
 #ifdef SERVER_OUTPUT
     puts("Waiting for connection.");
@@ -96,38 +96,52 @@ char* receive(int sock_desc, int *client_sock)
         // This is the client message buffer
         char recv_buffer[MESSAGE_LENGTH];
         int read_size;
-        if((read_size = recv(*client_sock, recv_buffer, MESSAGE_LENGTH, 0)) <= 0) return NULL;
+        if((read_size = recv(*client_sock, recv_buffer, MESSAGE_LENGTH, 0)) <= 0)
+            return SUCCEED_EXITCODE;
         if(!is_custom_protocol((unsigned char*)recv_buffer))
         {
 #ifdef SERVER_OUTPUT
             puts("Unknown protocol.");
 #endif
-            return NULL;
+            return UNKNOWN_PROTOCOL;
         }
-        // Ready to receive
+        // Receiving the client info
         int length = PROTOCOL_HEADER_LEN + get_body_length((unsigned char*)recv_buffer);
-        char *result = (char*)malloc(sizeof(length));
-        strncpy(result, recv_buffer, length);
-        return result;
+        char hostname[HOSTNAME_LENGTH];
+        struct sockaddr_in client_socket_addr;
+        msg2client_info((unsigned char*)hostname, &client_socket_addr, recv_buffer);
+        add_client(sock_desc, &client_socket_addr);
+        return SUCCEED_EXITCODE;
     }
-    return NULL;
+    return FAILED_CONNECTING;
 }
 
 // And this is the server thread routine
-void service(int client_sock, char* received)
+void service(int client_sock)
 {
     char mesg_buffer[MESSAGE_LENGTH];
-    switch(get_msg_type((unsigned char*)received))
+    int read_size;
+    while((read_size = recv(client_sock, mesg_buffer, MESSAGE_LENGTH, 0)) > 0)
     {
-        case REQ_TIME:
-            server_action_rpl_time(
-                client_sock, received, mesg_buffer); break;
-        case REQ_HOSTNAME: 
-            server_action_rpl_hostname(
-                client_sock, received, mesg_buffer); break;
-        default: break;
+        if(!is_custom_protocol((unsigned char*)mesg_buffer))
+        {
+#ifdef SERVER_OUTPUT
+            puts("Unknown protocol.");
+#endif
+            return; // Exit thread
+        }
+        switch(get_msg_type((unsigned char*)mesg_buffer))
+        {
+            case REQ_TIME:
+                server_action_rpl_time(
+                    client_sock, mesg_buffer, mesg_buffer); break;
+            case REQ_HOSTNAME: 
+                server_action_rpl_hostname(
+                    client_sock, mesg_buffer, mesg_buffer); break;
+            default: break;
+        }
     }
+    
     // TODO: This shall be modified
     puts("mesg_buffer");
-    free(received);
 }

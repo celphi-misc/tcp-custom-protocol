@@ -43,6 +43,10 @@ typedef struct {
 
 #define PROTOCOL_HEADER_LEN 8
 
+// This function is for test use
+void print_array_in_hex(unsigned char *array);
+
+
 // Client sending its hostname and IP address
 // This behavior is done as soon as the connection is structured
 // The return value is the length of the whole message
@@ -52,9 +56,6 @@ int client_info_msg_to_send(
 // The return value is the length of the hostname
 int msg2client_info(
     unsigned char *dest_hostname, struct sockaddr_in *dest_sockaddr, const unsigned char *src);
-
-// This function is for test use
-void print_array_in_hex(unsigned char *array);
 
 // To test if the input is of our protocol
 int is_custom_protocol(const unsigned char *buf);
