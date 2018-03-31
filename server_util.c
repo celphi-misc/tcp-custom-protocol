@@ -5,6 +5,9 @@ char hostname[HOSTNAME_LENGTH];
 // Init flag
 int intialized;
 
+// TODO: Add a global entry for client info storage
+// I am too lazy to write something like a search tree
+
 // Initialize the server (initializing the hostname is enough)
 int init(void)
 {

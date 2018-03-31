@@ -7,7 +7,7 @@ OPTIONS = -c -Wall
 EXECUTABLE = server client test
 
 # Receipes of the server and the client 
-SERVER_RECEIPE = protocol.o server_util.o server.o
+SERVER_RECEIPE = protocol.o server_util.o server.o client_list.o
 CLIENT_RECEIPE = protocol.o client_util.o client.o
 
 # Linking commands
@@ -19,7 +19,7 @@ client: $(CLIENT_RECEIPE)
 all: server client
 
 # Dependencies
-server.o: server.c server_util.c protocol.c
+server.o: server.c server_util.c protocol.c client_list.c
 client.o: client.c client_util.c protocol.c
 
 # Phony target for cleaning up
