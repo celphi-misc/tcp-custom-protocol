@@ -3,6 +3,7 @@
 #define __CELPHI_SERVER_UTIL_H
 
 #include "commons.h"
+#include "client_list.h"
 
 // Methods
 
@@ -12,8 +13,9 @@
 int new_socket(uint16_t port);
 // Block to wait for accepting client connection
 // The argument is the socket descriptor
-int accept_client(int sock_desc, int *client_sock);
+// For successful acceptance, the method returns SUCCEED_EXITCODE
+int accept_client(int server_sock_desc, int *client_sock_desc);
 // And this is the server thread routine
-void service(int client_sock);
+void service(int client_sock_desc);
 
 #endif
