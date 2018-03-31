@@ -146,5 +146,25 @@ int msg2client_info(unsigned char *dest_hostname, struct sockaddr_in *dest_socka
 // TODO: This function is to be implemented
 MessageType interpret_raw_msg(unsigned char *dest, const unsigned char *src)
 {
-    return 0;
+    MessageType mesg_type = get_msg_type(src);
+    if(mesg_type < RPL_TIME || mesg_type >= RPL_BOUND) return UNKNOWN_TYPE;
+    switch(mesg_type)
+    {
+        case RPL_TIME:
+        {
+            time_t msg_time = msg2time(src);
+            strcpy(dest, ctime(&msg_time));
+            return RPL_TIME;
+        }
+        case RPL_HOSTNAME:
+            msg2hostname(dest, src);
+            return RPL_HOSTNAME;
+        case RPL_SOCK_DESC:     break;
+        case RPL_SOCK_ALL:      break;
+        case RPL_CLIENT_IP:     break;
+        case RPL_CLIENT_PORT:   break;
+        case RPL_SEND_MSG:      break;
+        case RPL_BOUND:         break;
+    }
+    return UNKNOWN_TYPE;
 }

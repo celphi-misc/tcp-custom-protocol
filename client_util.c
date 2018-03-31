@@ -86,7 +86,20 @@ void receive_reply(const int socket_desc, const int output_desc)
     }
 }
 
-// TODO:
+// Client request functions
+int request_hostname(int socket_desc)
+{
+    char buffer[MESSAGE_LENGTH];
+    int mesg_length = request_hostname_msg(buffer);
+    return send(socket_desc, buffer, mesg_length, 0);
+}
+
+int request_time(int socket_desc)
+{
+    char buffer[MESSAGE_LENGTH];
+    int mesg_length = request_time_msg(buffer);
+    return send(socket_desc, buffer, mesg_length, 0);
+}
 
 #if 0
 void show_welcome() 
