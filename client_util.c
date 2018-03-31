@@ -14,58 +14,48 @@ int init(void)
 }
 
 // Create a new socket on the referred port number and IP address
-// TODO: Here here here
-
-// TODO: To be refactored
-#if 0
-int init() 
+// The return value is either an error code (negative)
+// or a socket descriptor 
+int new_socket(uint16_t port, const char *ip_addr)
 {
-    if(gethostname(clientname, CLIENT_NAME_LENGTH))
+    int init_status;
+    if(!initialized) init_status = init();
+    if(init_status != SUCCEED_EXITCODE) return init_status;
+    // Create socket
+    int socket_desc = socket(AF_INET, SOCK_STREAM, 0);
+    if(socket_desc == -1)
     {
-#ifdef TEST_OUTPUT
-        puts("ERROR::INIT::CLIENT_NAME");
+#ifdef CLIENT_OUTPUT
+        perror("Socket creation failed.");
 #endif
-        return FAILED_HOSTNAME;
-    }
-    strcpy(hostname, clientname);
-    return SUCCEED_EXITCODE;
-}
-
-
-int new_socket(int* socket_desc, int port)
-{
-    if((*socket_desc = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-    {
-#ifdef TEST_OUTPUT
-        puts("ERROR::NEW_SOCKET::SOCKET_CREATION");
-#endif
-        socket_desc = NULL;
         return FAILED_SOCKET_CREATION;
     }
-#ifdef TEST_OUTPUT
-    puts("Socket generated.");
+#ifdef CLIENT_OUTPUT
+    puts("Socket created.");
 #endif
-
+    // sockaddr_in structure
     struct sockaddr_in server;
     server.sin_family = AF_INET;
+    server.sin_addr.s_addr = inet_addr(ip_addr);
     server.sin_port = htons(port);
-    server.sin_addr.s_addr = INADDR_ANY;
-    
-    // connect 
-    if (connect(*socket_desc, (struct sockaddr*)&server, sizeof(server)) == -1)
+    // Connecting to the remote server
+    if(connect(socket_desc, (struct sockaddr *)&server, sizeof(server)) < 0)
     {
-#ifdef TEST_OUTPUT    
-        puts("ERROR::NEW_SOCKET::SOCKET_CONNECTING");
+#ifdef CLIENT_OUTPUT
+        perror("Connection failed. Error");
 #endif
         return FAILED_CONNECTING;
     }
-#ifdef TEST_OUTPUT
-    puts("Connected.");
+#ifdef CLIENT_OUTPUT
+    puts("Connected");
 #endif
-    flag = true;
-    return SUCCEED_EXITCODE;
+    // TODO: Here to send the client info to the server
+    return socket_desc;
 }
 
+// TODO:
+
+#if 0
 void show_welcome() 
 {
     printf("+-----------------------------------------------+\n");

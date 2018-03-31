@@ -106,3 +106,39 @@ int msg2time(const unsigned char *src)
 {
     return ntohl(*(uint32_t*)(src + PROTOCOL_HEADER_LEN));
 }
+
+// Client sending its hostname and IP address
+// The return value is the length of the whole message
+int send_client_info_msg(unsigned char *dest, const unsigned char *hostname, const struct sockaddr_in *server)
+{
+    // Write magic
+    *(uint16_t*)(dest)       = htons(MAGIC);
+    // Write body length
+    *(uint32_t*)(dest + 2)   = htonl(strlen((char*)hostname) + 6);
+    // Write type
+    *(uint16_t*)(dest + 6)   = htons(CLIENT_INFO);
+    // Write IP address (uint32_t, 4B)
+    *(uint32_t*)(dest + 8)   = htonl(server->sin_addr.s_addr);
+    // Write port       (uint16_t, 2B)
+    *(uint16_t*)(dest + 12)  = htons(server->sin_port);
+    // Write hostname
+    strcpy((char*)(dest + 14), (char*)hostname);
+    return PROTOCOL_HEADER_LEN + strlen((char*)hostname) + 6;
+}
+
+// Interpreting client info at the server side
+// The return value is the length of the hostname
+int msg2client_info(unsigned char *dest_hostname, struct sockaddr_in *dest_sockaddr, const unsigned char *src)
+{
+    int body_length = get_body_length(dest_hostname);
+
+    // Copy IP address and port
+    dest_sockaddr->sin_family       = AF_INET;
+    dest_sockaddr->sin_addr.s_addr  = ntohl(*(uint32_t*)(src + 8));
+    dest_sockaddr->sin_port         = ntohs(*(uint16_t*)(src + 12));
+    
+    // Copy hostname
+    strncpy((char*)dest_hostname, (char*)(src + 14), body_length - 6);
+    dest_hostname[body_length - 6] = 0;
+    return body_length - 6;
+}

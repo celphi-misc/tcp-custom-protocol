@@ -17,6 +17,7 @@
 #include <arpa/inet.h>
 
 typedef enum {
+    CLIENT_INFO     = 0x0000,
     REQ_TIME        = 0x0001,
     REQ_HOSTNAME    = 0x0002,
     REQ_SOCK_DESC   = 0x0003,
@@ -41,6 +42,15 @@ typedef struct {
 } Message;
 
 #define PROTOCOL_HEADER_LEN 8
+
+// Client sending its hostname and IP address
+// The return value is the length of the whole message
+int send_client_info_msg(
+    unsigned char *dest, const unsigned char *hostname, const struct sockaddr_in *server);
+// Interpreting client info at the server side
+// The return value is the length of the hostname
+int msg2client_info(
+    unsigned char *dest_hostname, struct sockaddr_in *dest_sockaddr, const unsigned char *src);
 
 // This function is for test use
 void print_array_in_hex(unsigned char *array);
