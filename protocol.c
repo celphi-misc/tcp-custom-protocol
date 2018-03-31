@@ -109,7 +109,7 @@ int msg2time(const unsigned char *src)
 
 // Client sending its hostname and IP address
 // The return value is the length of the whole message
-int send_client_info_msg(unsigned char *dest, const unsigned char *hostname, const struct sockaddr_in *server)
+int client_info_msg_to_send(unsigned char *dest, const unsigned char *hostname, const struct sockaddr_in *socket_addr)
 {
     // Write magic
     *(uint16_t*)(dest)       = htons(MAGIC);
@@ -118,9 +118,9 @@ int send_client_info_msg(unsigned char *dest, const unsigned char *hostname, con
     // Write type
     *(uint16_t*)(dest + 6)   = htons(CLIENT_INFO);
     // Write IP address (uint32_t, 4B)
-    *(uint32_t*)(dest + 8)   = htonl(server->sin_addr.s_addr);
+    *(uint32_t*)(dest + 8)   = htonl(socket_addr->sin_addr.s_addr);
     // Write port       (uint16_t, 2B)
-    *(uint16_t*)(dest + 12)  = htons(server->sin_port);
+    *(uint16_t*)(dest + 12)  = htons(socket_addr->sin_port);
     // Write hostname
     strcpy((char*)(dest + 14), (char*)hostname);
     return PROTOCOL_HEADER_LEN + strlen((char*)hostname) + 6;

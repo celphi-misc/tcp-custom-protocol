@@ -44,9 +44,10 @@ typedef struct {
 #define PROTOCOL_HEADER_LEN 8
 
 // Client sending its hostname and IP address
+// This behavior is done as soon as the connection is structured
 // The return value is the length of the whole message
-int send_client_info_msg(
-    unsigned char *dest, const unsigned char *hostname, const struct sockaddr_in *server);
+int client_info_msg_to_send(
+    unsigned char *dest, const unsigned char *hostname, const struct sockaddr_in *socket_addr);
 // Interpreting client info at the server side
 // The return value is the length of the hostname
 int msg2client_info(

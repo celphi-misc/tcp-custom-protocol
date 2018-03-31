@@ -34,12 +34,12 @@ int new_socket(uint16_t port, const char *ip_addr)
     puts("Socket created.");
 #endif
     // sockaddr_in structure
-    struct sockaddr_in server;
-    server.sin_family = AF_INET;
-    server.sin_addr.s_addr = inet_addr(ip_addr);
-    server.sin_port = htons(port);
+    struct sockaddr_in socket_addr;
+    socket_addr.sin_family = AF_INET;
+    socket_addr.sin_addr.s_addr = inet_addr(ip_addr);
+    socket_addr.sin_port = htons(port);
     // Connecting to the remote server
-    if(connect(socket_desc, (struct sockaddr *)&server, sizeof(server)) < 0)
+    if(connect(socket_desc, (struct sockaddr *)&socket_addr, sizeof(socket_addr)) < 0)
     {
 #ifdef CLIENT_OUTPUT
         perror("Connection failed. Error");
@@ -49,7 +49,18 @@ int new_socket(uint16_t port, const char *ip_addr)
 #ifdef CLIENT_OUTPUT
     puts("Connected");
 #endif
-    // TODO: Here to send the client info to the server
+    // Here to send the client info to the server
+    unsigned char message[MESSAGE_LENGTH];
+    int message_length
+        = client_info_msg_to_send(message, (unsigned char*)hostname, &socket_addr);
+    int send_exit_code = send(socket_desc, (struct sockaddr*)&socket_addr, message_length, 0);
+    if(send_exit_code < 0)
+    {
+#ifdef CLIENT_OUTPUT
+        puts("Send failed.");
+#endif
+        return FAILED_SENDING;
+    }
     return socket_desc;
 }
 
@@ -72,4 +83,3 @@ void show_welcome()
     printf("+-----------------------------------------------+\n");
 }
 #endif
-
