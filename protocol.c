@@ -12,7 +12,7 @@ const uint16_t MAGIC = 0xBEEF;
 void print_array_in_hex(unsigned char *array)
 {
     int len = ntohl(*(int*)(array + 2));
-    for(int i = 0; i < len + PROTOCOL_HEADER_LEN; i++)
+    for(int i = 0; i < len + PROTOCOL_HEADER_LEN && i < 64; i++)
     {
         printf("%2x ", array[i]);
         if(i%16 == 15) puts("");
@@ -96,9 +96,9 @@ int reply_hostname_msg(unsigned char *dest, const unsigned char *src)
 // Convert the hostname reply message to real hostname
 int msg2hostname(unsigned char *dest, const unsigned char *src)
 {
-    strncpy(dest, src + PROTOCOL_HEADER_LEN, get_body_length(src));
+    strncpy((char*)dest, (const char*)src + PROTOCOL_HEADER_LEN, get_body_length(src));
     dest[get_body_length(src)] = 0;
-    return strlen(dest);
+    return strlen((char*)dest);
 }
 
 // Convert the time reply message to Unix time
@@ -123,6 +123,10 @@ int client_info_msg_to_send(unsigned char *dest, const unsigned char *hostname, 
     *(uint16_t*)(dest + 12)  = htons(socket_addr->sin_port);
     // Write hostname
     strcpy((char*)(dest + 14), (char*)hostname);
+#ifdef PROTOCOL_TEST
+    printf("Data size: %lu\n", PROTOCOL_HEADER_LEN + strlen((char*)hostname) + 6);
+    print_array_in_hex(dest);
+#endif
     return PROTOCOL_HEADER_LEN + strlen((char*)hostname) + 6;
 }
 
@@ -130,7 +134,7 @@ int client_info_msg_to_send(unsigned char *dest, const unsigned char *hostname, 
 // The return value is the length of the hostname
 int msg2client_info(unsigned char *dest_hostname, struct sockaddr_in *dest_sockaddr, const unsigned char *src)
 {
-    int body_length = get_body_length(dest_hostname);
+    int body_length = get_body_length(src);
 
     // Copy IP address and port
     dest_sockaddr->sin_family       = AF_INET;
@@ -153,18 +157,19 @@ MessageType interpret_raw_msg(unsigned char *dest, const unsigned char *src)
         case RPL_TIME:
         {
             time_t msg_time = msg2time(src);
-            strcpy(dest, ctime(&msg_time));
+            strcpy((char*)dest, ctime(&msg_time));
             return RPL_TIME;
         }
         case RPL_HOSTNAME:
             msg2hostname(dest, src);
             return RPL_HOSTNAME;
-        case RPL_SOCK_DESC:     break;
-        case RPL_SOCK_ALL:      break;
-        case RPL_CLIENT_IP:     break;
-        case RPL_CLIENT_PORT:   break;
-        case RPL_SEND_MSG:      break;
-        case RPL_BOUND:         break;
+        case RPL_SOCK_DESC:     return RPL_SOCK_DESC;
+        case RPL_SOCK_ALL:      return RPL_SOCK_ALL;
+        case RPL_CLIENT_IP:     return RPL_CLIENT_IP;
+        case RPL_CLIENT_PORT:   return RPL_CLIENT_PORT;
+        case RPL_SEND_MSG:      return RPL_SEND_MSG;
+        case RPL_BOUND:         return RPL_BOUND;
+        default: break;
     }
     return UNKNOWN_TYPE;
 }

@@ -1,27 +1,24 @@
 #include "server_util.h"
 
 // Global variables of the server
-char hostname[HOSTNAME_LENGTH];
+unsigned char hostname[HOSTNAME_LENGTH];
 // Init flag
 int intialized;
-
-// TODO: Add a global entry for client info storage
-// I am too lazy to write something like a search tree
 
 // Initialize the server (initializing the hostname is enough)
 int init(void)
 {
     if(!intialized) intialized = 1;
-    if(gethostname(hostname, HOSTNAME_LENGTH))
+    if(gethostname((char*)hostname, HOSTNAME_LENGTH))
         return FAILED_HOSTNAME;
     return SUCCEED_EXITCODE;
 }
 
 // Server reply current time 
 int server_action_rpl_time(
-    int client_sock, const char *recv_buffer)
+    int client_sock, const unsigned char *recv_buffer)
 {
-    char mesg_buffer[MESSAGE_LENGTH];
+    unsigned char mesg_buffer[MESSAGE_LENGTH];
     int mesg_length = reply_time_msg(mesg_buffer);
     // Write to the socket
     write(client_sock, mesg_buffer, mesg_length);
@@ -31,9 +28,9 @@ int server_action_rpl_time(
 
 // Server reply hostname
 int server_action_rpl_hostname(
-    int client_sock, const char *recv_buffer)
+    int client_sock, const unsigned char *recv_buffer)
 {
-    char mesg_buffer[MESSAGE_LENGTH];
+    unsigned char mesg_buffer[MESSAGE_LENGTH];
     int mesg_length = reply_hostname_msg(mesg_buffer, hostname);
     write(client_sock, mesg_buffer, mesg_length);
 
@@ -53,7 +50,7 @@ int new_socket(uint16_t port)
     if(socket_desc == -1)
     {
 #ifdef SERVER_OUTPUT
-        perror("Socket creation failed.");
+        perror("Socket creation failed");
 #endif
         return FAILED_SOCKET_CREATION;
     }
@@ -70,7 +67,7 @@ int new_socket(uint16_t port)
     if(bind(socket_desc, (struct sockaddr*)&server, sizeof(server)))
     {
 #ifdef SERVER_OUTPUT
-        perror("Binding failed.");
+        perror("Binding failed");
 #endif
         return FAILED_BINDING;
     }
@@ -99,10 +96,14 @@ int accept_client(int sock_desc, int *client_sock)
         puts("Connection accepted");
 #endif
         // This is the client message buffer
-        char recv_buffer[MESSAGE_LENGTH];
+        unsigned char recv_buffer[MESSAGE_LENGTH];
         int read_size;
         if((read_size = recv(*client_sock, recv_buffer, MESSAGE_LENGTH, 0)) <= 0)
             return SUCCEED_EXITCODE;
+#ifdef PROTOCOL_TEST
+        printf("Read size: %d\n", read_size);
+        print_array_in_hex(recv_buffer);
+#endif
         if(!is_custom_protocol((unsigned char*)recv_buffer))
         {
 #ifdef SERVER_OUTPUT
@@ -111,7 +112,7 @@ int accept_client(int sock_desc, int *client_sock)
             return UNKNOWN_PROTOCOL;
         }
         // Receiving the client info
-        int length = PROTOCOL_HEADER_LEN + get_body_length((unsigned char*)recv_buffer);
+        // int length = PROTOCOL_HEADER_LEN + get_body_length((unsigned char*)recv_buffer);
         char hostname[HOSTNAME_LENGTH];
         struct sockaddr_in client_socket_addr;
         msg2client_info((unsigned char*)hostname, &client_socket_addr, recv_buffer);
@@ -124,11 +125,15 @@ int accept_client(int sock_desc, int *client_sock)
 // And this is the server thread routine
 void service(int client_sock)
 {
-    char recv_buffer[MESSAGE_LENGTH];
+    unsigned char recv_buffer[MESSAGE_LENGTH];
     int read_size;
     while((read_size = recv(client_sock, recv_buffer, MESSAGE_LENGTH, 0)) > 0)
     {
-        if(!is_custom_protocol((unsigned char*)recv_buffer))
+#ifdef PROTOCOL_TEST
+        printf("Read size: %d\n", read_size);
+        print_array_in_hex(recv_buffer);
+#endif
+        if(!is_custom_protocol(recv_buffer))
         {
 #ifdef SERVER_OUTPUT
             puts("Unknown protocol.");

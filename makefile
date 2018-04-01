@@ -1,7 +1,7 @@
 # Compiler
 CC = gcc
 # Compiling options, -Wall for "Warning all"
-OPTIONS = -c -Wall
+OPTIONS = -g -c -Wall
 
 # A list of executable files, used for cleaning up
 EXECUTABLE = server client test
@@ -18,9 +18,8 @@ client: $(CLIENT_RECEIPE)
 # Make all
 all: server client
 
-# Dependencies
-server.o: server.c server_util.c protocol.c client_list.c
-client.o: client.c client_util.c protocol.c
+%.o: %.c
+	$(CC) $(OPTIONS) $<
 
 # Phony target for cleaning up
 .PHONY: clean
