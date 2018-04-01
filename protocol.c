@@ -65,7 +65,7 @@ int request_hostname_msg(unsigned char *dest)
 }
 
 // Write request message to dest that lists all descriptor
-int request_listing_clients(unsigned char *dest)
+int request_listing_clients_msg(unsigned char *dest)
 {
     // Write magic
     *(uint16_t*)(dest)       = htons(MAGIC);
@@ -105,49 +105,38 @@ int reply_hostname_msg(unsigned char *dest, const unsigned char *src)
     return PROTOCOL_HEADER_LEN + strlen((char*)src);
 }
 
-int reply_listing_clients(
-    unsigned char *dest, const int n,
-    const int* desc_list, const unsigned char **hostname_list)
+int reply_listing_clients_msg(unsigned char *dest, const int n,
+        const int *desc_list, const struct sockaddr_in *socket_addr_list)
 {
     // Write magic
     *(uint16_t*)(dest)      = htons(MAGIC);
+    // Write body length
+    *(uint32_t*)(dest + 2)  = htonl(n * 10);
     // Write type
     *(uint16_t*)(dest + 6)  = htons(RPL_SOCK_ALL);
-    int body_length = 0;
     char *body_pointer = (char*)dest + PROTOCOL_HEADER_LEN;
     // Write body
     for(int i = 0; i < n; i++)
     {
-        int hostname_length = strlen((char *)(hostname_list[i]));
-        *(uint32_t*)(body_pointer)  = htonl(desc_list[i]);
-        body_pointer += 4;
-        *(uint32_t*)(body_pointer)  = htonl(hostname_length);
-        body_pointer += 4;
-        strcpy(body_pointer, (char*)(hostname_list[i]));
-        body_pointer += hostname_length + 1;
-        body_length += 8 + hostname_length + 1;
+        *(uint32_t*)(body_pointer) = htonl(desc_list[i]);
+        *(uint32_t*)(body_pointer + 4) = htonl(socket_addr_list[i].sin_addr.s_addr);
+        *(uint16_t*)(body_pointer + 8) = htons(socket_addr_list[i].sin_port);
+        body_pointer += 10;
     }
-    // Write body length
-    *(uint32_t*)(dest + 2)   = htonl(body_length);
-    return PROTOCOL_HEADER_LEN + body_length;
+    return PROTOCOL_HEADER_LEN + n * 10;
 }
 
 int msg2client_list(int *desc_list,
-    unsigned char **hostname_list, const unsigned char *src)
+    struct sockaddr_in *socket_addr_list, const unsigned char *src)
 {
-    int n = 0;
     int body_length = ntohl(*(uint32_t*)(src + 2));
-    char *psrc = (char*)src + PROTOCOL_HEADER_LEN;
-    while(psrc < (char*)src + PROTOCOL_HEADER_LEN + body_length)
+    int n = body_length/10;
+    for(int i = 0; i < n; i++)
     {
-        desc_list[n] = ntohl(*(uint32_t*)(psrc));
-        psrc += 4;
-        int string_length = ntohl(*(uint32_t*)(psrc));
-        psrc += 4;
-        strncpy((char*)hostname_list[n], (char*)psrc, string_length);
-        psrc[string_length] = 0;
-        psrc += string_length + 1;
-        n++;
+        desc_list[i] = ntohl(*(uint32_t*)(src + PROTOCOL_HEADER_LEN + i * 10));
+        socket_addr_list[i].sin_family = AF_INET;
+        socket_addr_list[i].sin_addr.s_addr = ntohl(*(uint32_t*)(src + PROTOCOL_HEADER_LEN + i * 10 + 4));
+        socket_addr_list[i].sin_port = ntohs(*(uint16_t*)(src + PROTOCOL_HEADER_LEN + i * 10 + 8));
     }
     return n;
 }
@@ -204,31 +193,4 @@ int msg2client_info(unsigned char *dest_hostname, struct sockaddr_in *dest_socka
     strncpy((char*)dest_hostname, (char*)(src + 14), body_length - 6);
     dest_hostname[body_length - 6] = 0;
     return body_length - 6;
-}
-
-// TODO: This function is to be implemented
-MessageType interpret_raw_msg(unsigned char *dest, const unsigned char *src)
-{
-    MessageType mesg_type = get_msg_type(src);
-    if(mesg_type < RPL_TIME || mesg_type >= RPL_BOUND) return UNKNOWN_TYPE;
-    switch(mesg_type)
-    {
-        case RPL_TIME:
-        {
-            time_t msg_time = msg2time(src);
-            strcpy((char*)dest, ctime(&msg_time));
-            return RPL_TIME;
-        }
-        case RPL_HOSTNAME:
-            msg2hostname(dest, src);
-            return RPL_HOSTNAME;
-        case RPL_SOCK_DESC:     return RPL_SOCK_DESC;
-        case RPL_SOCK_ALL:      return RPL_SOCK_ALL;
-        case RPL_CLIENT_IP:     return RPL_CLIENT_IP;
-        case RPL_CLIENT_PORT:   return RPL_CLIENT_PORT;
-        case RPL_SEND_MSG:      return RPL_SEND_MSG;
-        case RPL_BOUND:         return RPL_BOUND;
-        default: break;
-    }
-    return UNKNOWN_TYPE;
 }

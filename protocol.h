@@ -96,21 +96,22 @@ int msg2hostname(unsigned char *dest, const unsigned char *src);
 // ---- Request format ----
 // [Header]
 // ---- Reply format ----
-// [Header] [uint32_t Socket descriptor 1]
-// [uint32_t Hostname length 1] [char string Hostname 1]
-//          [uint32_t Socket descriptor 2]
-// [uint32_t Hostname length 2] [char string Hostname 2]
+// [Header]
+// [uint32_t Socket descriptor 1]
+// [uint32_t IP address 1] [uint16_t Port 1]
+// [uint32_t Socket descriptor 2]
+// [uint32_t IP address 2] [uint16_t Port 2]
 //          ...
 // Write client list request message to dest
-int request_listing_clients(unsigned char *dest);
+int request_listing_clients_msg(unsigned char *dest);
 // Write client list reply message to dest
 // The return value is the size of the whole message
-int reply_listing_clients(unsigned char *dest, const int n,
-    const int *desc_list, const unsigned char **hostname_list);
+int reply_listing_clients_msg(unsigned char *dest, const int n,
+    const int *desc_list, const struct sockaddr_in *socket_addr_list);
 // Message to client list
 // The return value is the number of total clients
-int msg2cient_list(int *desc_list,
-    unsigned char **hostname_list, const unsigned char *src);
+int msg2client_list(int *desc_list,
+    struct sockaddr_in *socket_addr_list, const unsigned char *src);
 
 
 // This function converts the receiving message to human reabable string

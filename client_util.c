@@ -88,6 +88,46 @@ void receive_reply(const int socket_desc, const int output_desc)
     }
 }
 
+// TODO: This function is to be implemented
+MessageType interpret_raw_msg(unsigned char *dest, const unsigned char *src)
+{
+    MessageType mesg_type = get_msg_type(src);
+    if(mesg_type < RPL_TIME || mesg_type >= RPL_BOUND) return UNKNOWN_TYPE;
+    switch(mesg_type)
+    {
+        case RPL_TIME:
+        {
+            time_t msg_time = msg2time(src);
+            strcpy((char*)dest, ctime(&msg_time));
+            return RPL_TIME;
+        }
+        case RPL_HOSTNAME:
+            msg2hostname(dest, src);
+            return RPL_HOSTNAME;
+        case RPL_SOCK_DESC:     return RPL_SOCK_DESC;
+        case RPL_SOCK_ALL:
+        {
+            int desc_list[MAX_CLIENT];
+            struct sockaddr_in socket_addr_list[MAX_CLIENT];
+            int n = msg2client_list(desc_list, socket_addr_list, src);
+            for(int i = 0; i < n; i++)
+            {
+                sprintf((char*)dest, "%d: %s @ %d\n",
+                desc_list[i],
+                inet_ntoa(socket_addr_list[i].sin_addr),
+                (int) ntohs(socket_addr_list[i].sin_port));
+            }
+            return RPL_SOCK_ALL;
+        }
+        case RPL_CLIENT_IP:     return RPL_CLIENT_IP;
+        case RPL_CLIENT_PORT:   return RPL_CLIENT_PORT;
+        case RPL_SEND_MSG:      return RPL_SEND_MSG;
+        case RPL_BOUND:         return RPL_BOUND;
+        default: break;
+    }
+    return UNKNOWN_TYPE;
+}
+
 // Client request functions
 int request_hostname(int socket_desc)
 {
@@ -100,5 +140,12 @@ int request_time(int socket_desc)
 {
     unsigned char buffer[MESSAGE_LENGTH];
     int mesg_length = request_time_msg(buffer);
+    return send(socket_desc, buffer, mesg_length, 0);
+}
+
+int request_listing_clients(int socket_desc)
+{
+    unsigned char buffer[MESSAGE_LENGTH];
+    int mesg_length = request_listing_clients_msg(buffer);
     return send(socket_desc, buffer, mesg_length, 0);
 }

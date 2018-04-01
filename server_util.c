@@ -41,8 +41,26 @@ int server_action_rpl_hostname(
 int server_action_rpl_client_list(
     int client_sock, const unsigned char *recv_buffer)
 {
-    // TODO
-    return 0;
+    int desc_list[MAX_CLIENT];
+    struct sockaddr_in socket_addr_list[MAX_CLIENT];
+    unsigned char mesg_buffer[MESSAGE_LENGTH];
+    int n = 0;
+    for(int i = 0; i < MAX_CLIENT; i++)
+    {
+        if(client_list[i].desc > 0)
+        {
+            desc_list[n] = client_list[i].desc;
+            socket_addr_list[n] = client_list[i].socket_addr;
+            n++;
+        }
+    }
+    int mesg_length = reply_listing_clients_msg(mesg_buffer, n, desc_list, socket_addr_list);
+#ifdef PROTOCOL_TEST
+    print_array_in_hex(mesg_buffer);
+#endif
+    write(client_sock, mesg_buffer, mesg_length);
+
+    return SUCCEED_EXITCODE;
 }
 
 // Create a new socket on the referred port number
@@ -154,6 +172,8 @@ void service(int client_sock)
                 server_action_rpl_time(client_sock, recv_buffer); break;
             case REQ_HOSTNAME: 
                 server_action_rpl_hostname(client_sock, recv_buffer); break;
+            case REQ_SOCK_ALL:
+                server_action_rpl_client_list(client_sock, recv_buffer); break;
             default: break;
         }
     }
