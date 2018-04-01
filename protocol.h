@@ -113,6 +113,23 @@ int reply_listing_clients_msg(unsigned char *dest, const int n,
 int msg2client_list(int *desc_list,
     struct sockaddr_in *socket_addr_list, const unsigned char *src);
 
+// ==== Client communication ====
+// ---- Request format ----
+// [Header] [uint32_t To client socket number]
+// [uint32_t String length] [char string message]
+// ---- Reply ----
+// Write to the specified client!!
+// [Header] [uint32_t From client socket number]
+// [uint32_t String length] [char string message]
+
+// Write the client communication request message
+int request_comm_msg(unsigned char *dest, int to_desc, const char *content);
+// Write the message to the corresponding client
+int reply_comm_msg(unsigned char *dest, int from_desc, const char *content);
+// Message to real content
+// The return value is the from descriptor
+int msg2content(unsigned char *dest, unsigned char *src);
+
 
 // This function converts the receiving message to human reabable string
 // And returns the message type
