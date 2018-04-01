@@ -92,6 +92,25 @@ int reply_hostname_msg(unsigned char *dest, const unsigned char *src);
 // Message to hostname
 int msg2hostname(unsigned char *dest, const unsigned char *src);
 
+// ==== Client list ====
+// ---- Request format ----
+// [Header]
+// ---- Reply format ----
+// [Header] [uint32_t Socket descriptor 1]
+// [uint32_t Hostname length 1] [char string Hostname 1]
+//          [uint32_t Socket descriptor 2]
+// [uint32_t Hostname length 2] [char string Hostname 2]
+//          ...
+// Write client list request message to dest
+int request_listing_clients(unsigned char *dest);
+// Write client list reply message to dest
+// The return value is the size of the whole message
+int reply_listing_clients(unsigned char *dest, const int n,
+    const int *desc_list, const unsigned char **hostname_list);
+// Message to client list
+// The return value is the number of total clients
+int msg2cient_list(int *desc_list,
+    unsigned char **hostname_list, const unsigned char *src);
 
 
 // This function converts the receiving message to human reabable string

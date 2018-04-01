@@ -64,6 +64,18 @@ int request_hostname_msg(unsigned char *dest)
     return PROTOCOL_HEADER_LEN;
 }
 
+// Write request message to dest that lists all descriptor
+int request_listing_clients(unsigned char *dest)
+{
+    // Write magic
+    *(uint16_t*)(dest)       = htons(MAGIC);
+    // Write body length
+    *(uint32_t*)(dest + 2)   = 0;
+    // Write type
+    *(uint16_t*)(dest + 6)   = htons(REQ_SOCK_ALL);
+    return PROTOCOL_HEADER_LEN;
+}
+
 // Write time reply message to dest
 int reply_time_msg(unsigned char *dest)
 {
@@ -91,6 +103,53 @@ int reply_hostname_msg(unsigned char *dest, const unsigned char *src)
     // Write body
     strcpy((char*)(dest + PROTOCOL_HEADER_LEN), (char*)src);
     return PROTOCOL_HEADER_LEN + strlen((char*)src);
+}
+
+int reply_listing_clients(
+    unsigned char *dest, const int n,
+    const int* desc_list, const unsigned char **hostname_list)
+{
+    // Write magic
+    *(uint16_t*)(dest)      = htons(MAGIC);
+    // Write type
+    *(uint16_t*)(dest + 6)  = htons(RPL_SOCK_ALL);
+    int body_length = 0;
+    char *body_pointer = (char*)dest + PROTOCOL_HEADER_LEN;
+    // Write body
+    for(int i = 0; i < n; i++)
+    {
+        int hostname_length = strlen((char *)(hostname_list[i]));
+        *(uint32_t*)(body_pointer)  = htonl(desc_list[i]);
+        body_pointer += 4;
+        *(uint32_t*)(body_pointer)  = htonl(hostname_length);
+        body_pointer += 4;
+        strcpy(body_pointer, (char*)(hostname_list[i]));
+        body_pointer += hostname_length + 1;
+        body_length += 8 + hostname_length + 1;
+    }
+    // Write body length
+    *(uint32_t*)(dest + 2)   = htonl(body_length);
+    return PROTOCOL_HEADER_LEN + body_length;
+}
+
+int msg2client_list(int *desc_list,
+    unsigned char **hostname_list, const unsigned char *src)
+{
+    int n = 0;
+    int body_length = ntohl(*(uint32_t*)(src + 2));
+    char *psrc = (char*)src + PROTOCOL_HEADER_LEN;
+    while(psrc < (char*)src + PROTOCOL_HEADER_LEN + body_length)
+    {
+        desc_list[n] = ntohl(*(uint32_t*)(psrc));
+        psrc += 4;
+        int string_length = ntohl(*(uint32_t*)(psrc));
+        psrc += 4;
+        strncpy((char*)hostname_list[n], (char*)psrc, string_length);
+        psrc[string_length] = 0;
+        psrc += string_length + 1;
+        n++;
+    }
+    return n;
 }
 
 // Convert the hostname reply message to real hostname

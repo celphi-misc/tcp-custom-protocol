@@ -9,7 +9,7 @@
 
 // Constants
 #define MESSAGE_LENGTH      4096
-#define HOSTNAME_LENGTH     2048
+#define HOSTNAME_LENGTH     64
 #define READABLE_IP_LENGTH  17
 // The maximum number of clients that the server can handle
 #define MAX_CLIENT          64

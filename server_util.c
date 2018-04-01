@@ -37,6 +37,14 @@ int server_action_rpl_hostname(
     return SUCCEED_EXITCODE;
 }
 
+// Server reply client list
+int server_action_rpl_client_list(
+    int client_sock, const unsigned char *recv_buffer)
+{
+    // TODO
+    return 0;
+}
+
 // Create a new socket on the referred port number
 // The return value is either an error code (negative)
 // or a socket descriptor.
