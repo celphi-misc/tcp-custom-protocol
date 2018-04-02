@@ -176,7 +176,12 @@ void service(int client_sock)
 #endif
             return; // Exit thread
         }
-        switch(get_msg_type((unsigned char*)recv_buffer))
+        MessageType mesg_type = get_msg_type((unsigned char*)recv_buffer);
+#ifdef PROTOCOL_TEST
+        printf("%d: \n", mesg_type);
+        print_array_in_hex(recv_buffer);
+#endif
+        switch(mesg_type)
         {
             case REQ_TIME:
                 server_action_rpl_time(client_sock, recv_buffer); break;
@@ -187,13 +192,14 @@ void service(int client_sock)
             case REQ_SEND_MSG:
             {
                 int exit_code = 
-                    server_action_rpl_comm_msg(client_sock, recv_buffer); break;
+                    server_action_rpl_comm_msg(client_sock, recv_buffer);
 #ifdef SERVER_OUTPUT
                 if(!exit_code)
                 {
                     puts("Unable to send message to client.");
                 }
 #endif
+                break;
             }
             default: break;
         }

@@ -73,7 +73,11 @@ void receive_reply(const int socket_desc, const int output_desc)
     // Message buffer contains the human readable string of the received message
     // Which is defined by the protocol
     unsigned char mesg_buffer[MESSAGE_LENGTH];
-    while(recv(socket_desc, recv_buffer, MESSAGE_LENGTH, 0) > 0)
+    int received = recv(socket_desc, recv_buffer, MESSAGE_LENGTH, 0);
+#ifdef PROTOCOL_TEST
+    print_array_in_hex(recv_buffer);
+#endif
+    while(received > 0)
     {
         // The function below is provided by protocol.h
         // which can convert the message to human readable string

@@ -15,7 +15,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#define PROTOCOL_TEST
+// #define PROTOCOL_TEST
 
 typedef enum {
     CLIENT_INFO     = 0x0000,

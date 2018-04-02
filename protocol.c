@@ -88,7 +88,7 @@ int request_comm_msg(unsigned char *dest, int to_desc, const char *content)
     // Write to_desc
     *(uint32_t*)(dest + PROTOCOL_HEADER_LEN) = htonl(to_desc);
     // Write message
-    strncpy((char*)dest, content, strlen(content));
+    strncpy((char*)(dest + PROTOCOL_HEADER_LEN + 4), content, strlen(content));
     return PROTOCOL_HEADER_LEN + 4 + strlen(content);
 }
 
