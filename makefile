@@ -2,6 +2,7 @@
 CC = gcc
 # Compiling options, -Wall for "Warning all"
 OPTIONS = -g -c -Wall
+HEADERS = *.h
 
 # A list of executable files, used for cleaning up
 EXECUTABLE = server client test
@@ -10,15 +11,15 @@ EXECUTABLE = server client test
 SERVER_RECEIPE = protocol.o server_util.o server.o client_list.o
 CLIENT_RECEIPE = protocol.o client_util.o client.o
 
+# Make all
+all: server client
 # Linking commands
 server: $(SERVER_RECEIPE)
 	$(CC) -o server $(SERVER_RECEIPE)
 client: $(CLIENT_RECEIPE)
 	$(CC) -o client $(CLIENT_RECEIPE)
-# Make all
-all: server client
 
-%.o: %.c
+%.o: %.c  $(HEADERS)
 	$(CC) $(OPTIONS) $<
 
 # Phony target for cleaning up

@@ -63,6 +63,16 @@ int server_action_rpl_client_list(
     return SUCCEED_EXITCODE;
 }
 
+int server_action_rpl_comm_msg(
+    int client_sock, const unsigned char *recv_buffer)
+{
+    unsigned char content[MESSAGE_LENGTH];
+    int to_desc = msg2content(content, recv_buffer);
+    unsigned char mesg_buffer[MESSAGE_LENGTH];
+    int mesg_length = reply_comm_msg(mesg_buffer, client_sock, (char*)content);
+    return write(to_desc, mesg_buffer, mesg_length);
+}
+
 // Create a new socket on the referred port number
 // The return value is either an error code (negative)
 // or a socket descriptor.
@@ -174,6 +184,17 @@ void service(int client_sock)
                 server_action_rpl_hostname(client_sock, recv_buffer); break;
             case REQ_SOCK_ALL:
                 server_action_rpl_client_list(client_sock, recv_buffer); break;
+            case REQ_SEND_MSG:
+            {
+                int exit_code = 
+                    server_action_rpl_comm_msg(client_sock, recv_buffer); break;
+#ifdef SERVER_OUTPUT
+                if(!exit_code)
+                {
+                    puts("Unable to send message to client.");
+                }
+#endif
+            }
             default: break;
         }
     }

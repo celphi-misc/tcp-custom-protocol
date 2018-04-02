@@ -15,7 +15,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-// #define PROTOCOL_TEST
+#define PROTOCOL_TEST
 
 typedef enum {
     CLIENT_INFO     = 0x0000,
@@ -127,8 +127,8 @@ int request_comm_msg(unsigned char *dest, int to_desc, const char *content);
 // Write the message to the corresponding client
 int reply_comm_msg(unsigned char *dest, int from_desc, const char *content);
 // Message to real content
-// The return value is the from descriptor
-int msg2content(unsigned char *dest, unsigned char *src);
+// The return value is the from/to descriptor
+int msg2content(unsigned char *dest, const unsigned char *src);
 
 
 // This function converts the receiving message to human reabable string

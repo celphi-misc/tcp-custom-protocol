@@ -76,6 +76,49 @@ int request_listing_clients_msg(unsigned char *dest)
     return PROTOCOL_HEADER_LEN;
 }
 
+// Write the client communication request message
+int request_comm_msg(unsigned char *dest, int to_desc, const char *content)
+{
+    // Write magic
+    *(uint16_t*)(dest)      = htons(MAGIC);
+    // Write body length
+    *(uint32_t*)(dest + 2)  = htonl(4 + strlen(content));
+    // Write type
+    *(uint16_t*)(dest + 6)  = htons(REQ_SEND_MSG);
+    // Write to_desc
+    *(uint32_t*)(dest + PROTOCOL_HEADER_LEN) = htonl(to_desc);
+    // Write message
+    strncpy((char*)dest, content, strlen(content));
+    return PROTOCOL_HEADER_LEN + 4 + strlen(content);
+}
+
+// Write the message to the corresponding client
+int reply_comm_msg(unsigned char *dest, int from_desc, const char *content)
+{
+    // Write magic
+    *(uint16_t*)(dest)      = htons(MAGIC);
+    // Write body length
+    *(uint32_t*)(dest + 2)  = htonl(4 + strlen(content));
+    // Write type
+    *(uint16_t*)(dest + 6)  = htons(RPL_SEND_MSG);
+    // Write from_desc
+    *(uint32_t*)(dest + PROTOCOL_HEADER_LEN) = htonl(from_desc);
+    // Write messge
+    strncpy((char*)dest + PROTOCOL_HEADER_LEN + 4, content, strlen(content));
+    return PROTOCOL_HEADER_LEN + 4 + strlen(content);
+}
+
+// Message to real content
+// The return value is the from/to descriptor
+int msg2content(unsigned char *dest, const unsigned char *src)
+{
+    int content_length = ntohl(*(uint32_t*)(src + 2)) - 4;
+    int to = ntohl(*(uint32_t*)(src + PROTOCOL_HEADER_LEN));
+    strncpy((char*)dest, (char*)src + PROTOCOL_HEADER_LEN + 4, content_length);
+    dest[content_length] = 0;
+    return to;
+}
+
 // Write time reply message to dest
 int reply_time_msg(unsigned char *dest)
 {
