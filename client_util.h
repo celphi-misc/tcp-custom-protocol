@@ -1,5 +1,5 @@
-#ifndef __ZEPHYR_SERVER_UTIL_H
-#define __ZEPHYR_SERVER_UTIL_H
+#ifndef __ZEPHYR_CLIENT_UTIL_H
+#define __ZEPHYR_CLIENT_UTIL_H
 
 #include "commons.h"
 
