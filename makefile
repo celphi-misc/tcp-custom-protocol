@@ -15,9 +15,9 @@ CLIENT_RECEIPE = protocol.o client_util.o client.o
 all: server client
 # Linking commands
 server: $(SERVER_RECEIPE)
-	$(CC) -o server $(SERVER_RECEIPE)
+	$(CC) -o server $(SERVER_RECEIPE) -lpthread
 client: $(CLIENT_RECEIPE)
-	$(CC) -o client $(CLIENT_RECEIPE)
+	$(CC) -o client $(CLIENT_RECEIPE) -lpthread
 
 %.o: %.c  $(HEADERS)
 	$(CC) $(OPTIONS) $<
