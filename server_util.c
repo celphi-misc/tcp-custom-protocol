@@ -99,6 +99,16 @@ int new_socket(uint16_t port)
     server.sin_addr.s_addr = INADDR_ANY;
     server.sin_port = htons(port);
 
+    // Reuse addr
+    int on = 1;
+    if(setsockopt(socket_desc, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on))< 0)
+    {
+#ifdef SERVER_OUTPUT
+        perror("Set socket option failed");
+#endif
+        return(FAILED_SOCKET_CREATION);
+    }
+
     // Binding
     if(bind(socket_desc, (struct sockaddr*)&server, sizeof(server)))
     {
