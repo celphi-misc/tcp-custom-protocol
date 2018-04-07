@@ -89,6 +89,7 @@ void receive_reply(const int socket_desc, const int output_desc)
 
         // Here to write the string to the output device
         write(output_desc, mesg_buffer, strlen((char*)mesg_buffer) + 1);
+        received = 0;
     }
 }
 
