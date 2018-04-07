@@ -9,7 +9,7 @@ EXECUTABLE = server client test
 
 # Receipes of the server and the client 
 SERVER_RECEIPE = protocol.o server_util.o server.o client_list.o
-CLIENT_RECEIPE = protocol.o client_util.o client.o
+CLIENT_RECEIPE = protocol.o client_util.o client.o client_cli.o
 
 # Make all
 all: server client
