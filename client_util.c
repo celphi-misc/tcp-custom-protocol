@@ -113,14 +113,18 @@ MessageType interpret_raw_msg(unsigned char *dest, const unsigned char *src)
         case RPL_SOCK_ALL:
         {
             int desc_list[MAX_CLIENT];
+            char** name_list = (char**)malloc(sizeof(char*)*MAX_CLIENT);
             struct sockaddr_in socket_addr_list[MAX_CLIENT];
-            int n = msg2client_list(desc_list, socket_addr_list, src);
+            int n = msg2client_list(desc_list, socket_addr_list, name_list, src);
+            int offset=0;
             for(int i = 0; i < n; i++)
             {
-                sprintf((char*)dest, "%d: %s @ %d\n",
+                sprintf((char*)dest+offset, "%d: %s %s @ %d\n",
                 desc_list[i],
+                name_list[i],
                 inet_ntoa(socket_addr_list[i].sin_addr),
                 (int) ntohs(socket_addr_list[i].sin_port));
+                offset=(int)strlen((char*)dest);
             }
             return RPL_SOCK_ALL;
         }
