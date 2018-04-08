@@ -64,6 +64,18 @@ int request_hostname_msg(unsigned char *dest)
     return PROTOCOL_HEADER_LEN;
 }
 
+// Write disconnect request message to dest
+int request_disconnect_msg(unsigned char *dest)
+{
+    // Write magic
+    *(uint16_t*)(dest)      = htons(MAGIC);
+    // Write body length 
+    *(uint32_t*)(dest + 2)  = 0;
+    // Write type
+    *(uint16_t*)(dest + 6)  = htons(REQ_DISCONNECT);
+    return PROTOCOL_HEADER_LEN;
+}
+
 // Write request message to dest that lists all descriptor
 int request_listing_clients_msg(unsigned char *dest)
 {
@@ -92,6 +104,20 @@ int request_comm_msg(unsigned char *dest, int to_desc, const char *content)
     return PROTOCOL_HEADER_LEN + 4 + strlen(content);
 }
 
+// Write the send-status back to the sender
+int reply_comm_msg_sender(unsigned char *dest, int length)
+{
+    // Write magic
+    *(uint16_t*)(dest)       = htons(MAGIC);
+    // Write body length
+    *(uint32_t*)(dest + 2)   = htonl(4);
+    // Write type
+    *(uint16_t*)(dest + 6)   = htons(RPL_SEND_SENDER);
+    // Write length
+    *(uint32_t*)(dest + PROTOCOL_HEADER_LEN) = htonl(length);
+    return PROTOCOL_HEADER_LEN + 4;
+}
+
 // Write the message to the corresponding client
 int reply_comm_msg(unsigned char *dest, int from_desc, const char *content)
 {
@@ -117,6 +143,20 @@ int msg2content(unsigned char *dest, const unsigned char *src)
     strncpy((char*)dest, (char*)src + PROTOCOL_HEADER_LEN + 4, content_length);
     dest[content_length] = 0;
     return to;
+}
+
+void msg2length(unsigned char *dest, const unsigned char *src)
+{
+    int length = ntohl(*(uint32_t*)(src+PROTOCOL_HEADER_LEN));
+    if(length==0)
+    {
+        sprintf((char*)dest, "Sending failed, nothing sent.\n");
+    }
+    else 
+    {
+        sprintf((char*)dest, "Sending succeeded, %d bytes sent.\n", length);
+    }
+    return;
 }
 
 // Write time reply message to dest
