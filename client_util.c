@@ -133,9 +133,17 @@ MessageType interpret_raw_msg(unsigned char *dest, const unsigned char *src)
         case RPL_SEND_MSG:
         {
             unsigned char content_buffer[MESSAGE_LENGTH];
-            int from = msg2content(dest, content_buffer);
+            int from = msg2content(content_buffer, src);
             sprintf((char*)dest, "%d: %s\n", from, content_buffer);
             return RPL_SEND_MSG;
+        }
+        case RPL_SEND_SENDER:
+        {
+#ifdef PROTOCOL_TEST
+            printf("reply received.\n");
+#endif
+            msg2length(dest, src);
+            return RPL_SEND_SENDER;
         }
         case RPL_BOUND:         return RPL_BOUND;
         default: break;
@@ -169,5 +177,12 @@ int request_send_message(int socket_desc, int to_desc, const char *src)
 {
     unsigned char buffer[MESSAGE_LENGTH];
     int mesg_length = request_comm_msg(buffer, to_desc, src);
+    return send(socket_desc, buffer, mesg_length, 0);
+}
+
+int request_disconnect(int socket_desc)
+{
+    unsigned char buffer[MESSAGE_LENGTH];
+    int mesg_length = request_disconnect_msg(buffer);
     return send(socket_desc, buffer, mesg_length, 0);
 }

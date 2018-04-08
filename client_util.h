@@ -25,5 +25,6 @@ int request_hostname(int socket_desc);
 int request_time(int socket_desc);
 int request_listing_clients(int socket_desc);
 int request_send_message(int socket_desc, int to_desc, const char *src);
+int request_disconnect(int socket_desc);
 
 #endif
