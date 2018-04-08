@@ -15,7 +15,7 @@ int add_client(int desc, char* const hostname , struct sockaddr_in *p_socket_add
     }
     if(i == MAX_CLIENT)
         return MAX_CLIENT_EXCEEDED;
-    client_list[i].desc = i+1;
+    client_list[i].desc = desc;
     client_list[i].name = (char*)malloc(sizeof(char) * 64);
     strcpy(client_list[i].name, (const char*)hostname);
     client_list[i].socket_addr = *p_socket_addr;
