@@ -188,7 +188,8 @@ int msg2client_list(int *desc_list,
 int msg2hostname(unsigned char *dest, const unsigned char *src)
 {
     strncpy((char*)dest, (const char*)src + PROTOCOL_HEADER_LEN, get_body_length(src));
-    dest[get_body_length(src)] = 0;
+    dest[get_body_length(src)] = '\n';
+    dest[get_body_length(src)+1] = 0;
     return strlen((char*)dest);
 }
 
