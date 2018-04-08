@@ -182,10 +182,8 @@ int msg2client_list(int *desc_list,
         socket_addr_list[i].sin_family = AF_INET;
         socket_addr_list[i].sin_addr.s_addr = ntohl(*(uint32_t*)(src + PROTOCOL_HEADER_LEN + i * (10+MAX_NAME_LENGTH) + 4));
         socket_addr_list[i].sin_port = ntohs(*(uint16_t*)(src + PROTOCOL_HEADER_LEN + i * (10+MAX_NAME_LENGTH) + 8));
-        printf("no problem");
         name_list[i] = (char*)malloc(sizeof(char) * MAX_NAME_LENGTH);
         strcpy(name_list[i], (char*)(src+PROTOCOL_HEADER_LEN + i*(10+MAX_NAME_LENGTH) + 10));
-        printf("no problem");
     }
     return n;
 }
