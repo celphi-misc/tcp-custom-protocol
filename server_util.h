@@ -5,6 +5,12 @@
 #include "commons.h"
 #include "client_list.h"
 
+typedef struct package package;
+struct package {
+    int client_sock;
+    char *recv_buf;
+};
+
 // Methods
 
 // Create a new socket on the referred port number

@@ -73,7 +73,22 @@ int server_action_rpl_comm_msg(
     int to_desc = msg2content(content, recv_buffer);
     unsigned char mesg_buffer[MESSAGE_LENGTH];
     int mesg_length = reply_comm_msg(mesg_buffer, client_sock, (char*)content);
-    return write(to_desc, mesg_buffer, mesg_length);
+    if(find_socket_addr(to_desc) == NULL)
+    {
+        printf("Orienting client not found, message sending cancelled.\n");
+        unsigned char mesg_back[MESSAGE_LENGTH];
+        int mesg_back_length = reply_comm_msg_sender(mesg_back, 0);
+        write(client_sock, mesg_back, mesg_back_length);
+        return 0;
+    }
+    else 
+    {
+        int ret = write(to_desc, mesg_buffer, mesg_length);
+        unsigned char mesg_back[MESSAGE_LENGTH];
+        int mesg_back_length = reply_comm_msg_sender(mesg_back, ret);
+        write(client_sock, mesg_back, mesg_back_length);
+        return ret;
+    }
 }
 
 // Create a new socket on the referred port number
@@ -165,7 +180,7 @@ int accept_client(int sock_desc, int *client_sock)
         unsigned char hostname[HOSTNAME_LENGTH];
         struct sockaddr_in client_socket_addr;
         msg2client_info(hostname, &client_socket_addr, recv_buffer);
-        add_client(sock_desc, hostname, &client_socket_addr);
+        add_client(*client_sock, (char*)hostname, &client_socket_addr);
         return SUCCEED_EXITCODE;
     }
     return FAILED_CONNECTING;
@@ -213,6 +228,16 @@ void service(int client_sock)
                 }
 #endif
                 break;
+            }
+            case REQ_DISCONNECT:
+            {
+                int ret;
+                if ((ret = remove_client(client_sock)) != CLIENT_NOT_FOUND)
+                    printf("client %d disconnected.\n", client_sock);
+                else {
+                    printf("client %d not found.\n", client_sock);
+                }
+                return;
             }
             default: break;
         }
