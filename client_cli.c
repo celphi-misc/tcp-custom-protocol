@@ -1,5 +1,5 @@
 #include "client_cli.h"
-#define CLI_TEST
+// #define CLI_TEST
 
 char *s;
 int io_lock;
@@ -118,6 +118,7 @@ void show_nothing(int socket_desc, int out)
     io_release();
 }
 
+// format : "(num)message"
 int check_format(char* s, int* chat_id, int* mesg_start)
 {
     int p = 0;
@@ -137,6 +138,13 @@ int check_format(char* s, int* chat_id, int* mesg_start)
     }
     while (s[p] == ' ') p++;
     if(s[p++]!= ')')
+    {
+        chat_id = NULL;
+        mesg_start = NULL;
+        return NAN;
+    }
+    while (s[p]==' ') p++;
+    if(p==strlen(s)) 
     {
         chat_id = NULL;
         mesg_start = NULL;
@@ -170,6 +178,7 @@ int process_input_connected(int socket_desc)
     else if (strcmp(s, "hostip")==0 || strcmp(s, "hi")==0) 
     {
         printf("127.0.0.1\n");
+        io_release();
     }
     else if (strcmp(s, "time") == 0) 
     {
@@ -198,18 +207,25 @@ int process_input_connected(int socket_desc)
     }
     else if (strcmp(s, "exit")==0)
     {
+        request_disconnect(socket_desc);
         close(socket_desc);
-        return INPUT_EXIT;
+        printf("Disconnected.\n");
+        return show_welcome();
     }
     else 
     {
         int chat_id = 0;
         int mesg_start;
         int is_mesg = check_format(s, &chat_id, &mesg_start);
-
-        // TODO: implement sending message
-        printf("Unrecognized input, please try again.\n");
-        io_release();
+        if(!is_mesg) 
+        {
+            printf("Unrecognized input, please try again.\n");
+            io_release();
+        } 
+        else 
+        {
+            request_send_message(socket_desc, chat_id, s+mesg_start);
+        }
     }
     return process_input_connected(socket_desc);
 }
