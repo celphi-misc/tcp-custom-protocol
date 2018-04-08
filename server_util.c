@@ -42,6 +42,7 @@ int server_action_rpl_client_list(
     int client_sock, const unsigned char *recv_buffer)
 {
     int desc_list[MAX_CLIENT];
+    char** name_list=(char**)malloc(sizeof(char*) * MAX_CLIENT);
     struct sockaddr_in socket_addr_list[MAX_CLIENT];
     unsigned char mesg_buffer[MESSAGE_LENGTH];
     int n = 0;
@@ -50,11 +51,13 @@ int server_action_rpl_client_list(
         if(client_list[i].desc > 0)
         {
             desc_list[n] = client_list[i].desc;
+            name_list[n] = (char*)malloc(sizeof(char*)*MAX_NAME_LENGTH);
+            strcpy(name_list[n], (char*)client_list[i].name);
             socket_addr_list[n] = client_list[i].socket_addr;
             n++;
         }
     }
-    int mesg_length = reply_listing_clients_msg(mesg_buffer, n, desc_list, socket_addr_list);
+    int mesg_length = reply_listing_clients_msg(mesg_buffer, n, desc_list, socket_addr_list, name_list);
 #ifdef PROTOCOL_TEST
     print_array_in_hex(mesg_buffer);
 #endif
@@ -159,10 +162,10 @@ int accept_client(int sock_desc, int *client_sock)
         }
         // Receiving the client info
         // int length = PROTOCOL_HEADER_LEN + get_body_length((unsigned char*)recv_buffer);
-        char hostname[HOSTNAME_LENGTH];
+        unsigned char hostname[HOSTNAME_LENGTH];
         struct sockaddr_in client_socket_addr;
-        msg2client_info((unsigned char*)hostname, &client_socket_addr, recv_buffer);
-        add_client(sock_desc, &client_socket_addr);
+        msg2client_info(hostname, &client_socket_addr, recv_buffer);
+        add_client(sock_desc, hostname, &client_socket_addr);
         return SUCCEED_EXITCODE;
     }
     return FAILED_CONNECTING;
