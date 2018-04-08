@@ -20,6 +20,7 @@ int main(int argc, char **argv)
 
         pthread_t  pid;
         pthread_create(&pid, NULL, start_serve, &client_desc);
+        pthread_detach(pid);
 
         //service(client_desc);
     }
