@@ -6,17 +6,20 @@ ClientEntry client_list[MAX_CLIENT];
 // TODO: Thread safety
 
 // The result value is index of the new client
-int add_client(int desc, struct sockaddr_in *p_socket_addr)
+int add_client(int desc, char* const hostname , struct sockaddr_in *p_socket_addr)
 {
     int i;
-    for(i = 0; i <= MAX_CLIENT; i++)
+    for(i = 0; i < MAX_CLIENT; i++)
     {
         if(client_list[i].desc <= 0) break;
     }
     if(i == MAX_CLIENT)
         return MAX_CLIENT_EXCEEDED;
-    client_list[i].desc = desc;
+    client_list[i].desc = i+1;
+    client_list[i].name = (char*)malloc(sizeof(char) * 64);
+    strcpy(client_list[i].name, (const char*)hostname);
     client_list[i].socket_addr = *p_socket_addr;
+    printf("client : %d %s \n", client_list[i].desc, client_list[i].name);
     return i;
 }
 
@@ -24,7 +27,7 @@ int add_client(int desc, struct sockaddr_in *p_socket_addr)
 int remove_client(int desc)
 {
     int i;
-    for(i = 0; i <= MAX_CLIENT; i++)
+    for(i = 0; i < MAX_CLIENT; i++)
         if(client_list[i].desc == desc) break;
     if(i == MAX_CLIENT)
         return CLIENT_NOT_FOUND;
@@ -37,7 +40,7 @@ int remove_client(int desc)
 struct sockaddr_in *find_socket_addr(int desc)
 {
     int i;
-    for(i = 0; i <= MAX_CLIENT; i++)
+    for(i = 0; i < MAX_CLIENT; i++)
         if(client_list[i].desc == desc) break;
     if(i == MAX_CLIENT)
         return NULL;
