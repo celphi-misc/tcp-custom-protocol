@@ -149,12 +149,13 @@ int reply_hostname_msg(unsigned char *dest, const unsigned char *src)
 }
 
 int reply_listing_clients_msg(unsigned char *dest, const int n,
-        const int *desc_list, const struct sockaddr_in *socket_addr_list)
+        const int *desc_list, const struct sockaddr_in *socket_addr_list,
+        char *const * const name_list)
 {
     // Write magic
     *(uint16_t*)(dest)      = htons(MAGIC);
     // Write body length
-    *(uint32_t*)(dest + 2)  = htonl(n * 10);
+    *(uint32_t*)(dest + 2)  = htonl(n * (10+MAX_NAME_LENGTH));
     // Write type
     *(uint16_t*)(dest + 6)  = htons(RPL_SOCK_ALL);
     char *body_pointer = (char*)dest + PROTOCOL_HEADER_LEN;
@@ -164,22 +165,27 @@ int reply_listing_clients_msg(unsigned char *dest, const int n,
         *(uint32_t*)(body_pointer) = htonl(desc_list[i]);
         *(uint32_t*)(body_pointer + 4) = htonl(socket_addr_list[i].sin_addr.s_addr);
         *(uint16_t*)(body_pointer + 8) = htons(socket_addr_list[i].sin_port);
-        body_pointer += 10;
+        strcpy(body_pointer+10, name_list[i]);
+        body_pointer += 10+MAX_NAME_LENGTH;
     }
-    return PROTOCOL_HEADER_LEN + n * 10;
+    return PROTOCOL_HEADER_LEN + n * (10+MAX_NAME_LENGTH);
 }
 
 int msg2client_list(int *desc_list,
-    struct sockaddr_in *socket_addr_list, const unsigned char *src)
+    struct sockaddr_in *socket_addr_list, char** name_list, const unsigned char *src)
 {
     int body_length = ntohl(*(uint32_t*)(src + 2));
-    int n = body_length/10;
+    int n = body_length/(10+MAX_NAME_LENGTH);
     for(int i = 0; i < n; i++)
     {
-        desc_list[i] = ntohl(*(uint32_t*)(src + PROTOCOL_HEADER_LEN + i * 10));
+        desc_list[i] = ntohl(*(uint32_t*)(src + PROTOCOL_HEADER_LEN + i * (10+MAX_NAME_LENGTH)));
         socket_addr_list[i].sin_family = AF_INET;
-        socket_addr_list[i].sin_addr.s_addr = ntohl(*(uint32_t*)(src + PROTOCOL_HEADER_LEN + i * 10 + 4));
-        socket_addr_list[i].sin_port = ntohs(*(uint16_t*)(src + PROTOCOL_HEADER_LEN + i * 10 + 8));
+        socket_addr_list[i].sin_addr.s_addr = ntohl(*(uint32_t*)(src + PROTOCOL_HEADER_LEN + i * (10+MAX_NAME_LENGTH) + 4));
+        socket_addr_list[i].sin_port = ntohs(*(uint16_t*)(src + PROTOCOL_HEADER_LEN + i * (10+MAX_NAME_LENGTH) + 8));
+        printf("no problem");
+        name_list[i] = (char*)malloc(sizeof(char) * MAX_NAME_LENGTH);
+        strcpy(name_list[i], (char*)(src+PROTOCOL_HEADER_LEN + i*(10+MAX_NAME_LENGTH) + 10));
+        printf("no problem");
     }
     return n;
 }

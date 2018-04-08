@@ -39,6 +39,7 @@ typedef enum {
 } MessageType;
 
 #define PROTOCOL_HEADER_LEN 8
+#define MAX_NAME_LENGTH 64
 
 // This function is for test use
 void print_array_in_hex(unsigned char *array);
@@ -107,11 +108,11 @@ int request_listing_clients_msg(unsigned char *dest);
 // Write client list reply message to dest
 // The return value is the size of the whole message
 int reply_listing_clients_msg(unsigned char *dest, const int n,
-    const int *desc_list, const struct sockaddr_in *socket_addr_list);
+    const int *desc_list, const struct sockaddr_in *socket_addr_list, char * const * const name_list);
 // Message to client list
 // The return value is the number of total clients
 int msg2client_list(int *desc_list,
-    struct sockaddr_in *socket_addr_list, const unsigned char *src);
+    struct sockaddr_in *socket_addr_list, char **name_list, const unsigned char *src);
 
 // ==== Client communication ====
 // ---- Request format ----
