@@ -2,6 +2,7 @@
 
 // Global variables of the server
 unsigned char hostname[HOSTNAME_LENGTH];
+struct sockaddr_in server;
 // Init flag
 int intialized;
 
@@ -20,6 +21,18 @@ int server_action_rpl_time(
 {
     unsigned char mesg_buffer[MESSAGE_LENGTH];
     int mesg_length = reply_time_msg(mesg_buffer);
+    // Write to the socket
+    write(client_sock, mesg_buffer, mesg_length);
+
+    return SUCCEED_EXITCODE;
+}
+
+// Server reply host ip
+int server_action_rpl_host_ip(
+    int client_sock, const unsigned char *recv_buffer)
+{
+    unsigned char mesg_buffer[MESSAGE_LENGTH];
+    int mesg_length = reply_host_ip_msg(mesg_buffer, (unsigned char*)inet_ntoa(server.sin_addr));
     // Write to the socket
     write(client_sock, mesg_buffer, mesg_length);
 
@@ -75,7 +88,7 @@ int server_action_rpl_comm_msg(
     int mesg_length = reply_comm_msg(mesg_buffer, client_sock, (char*)content);
     if(find_socket_addr(to_desc) == NULL)
     {
-        printf("Orienting client not found, message sending cancelled.\n");
+        printf("Fault: Orienting client not found, message sending cancelled.\n");
         unsigned char mesg_back[MESSAGE_LENGTH];
         int mesg_back_length = reply_comm_msg_sender(mesg_back, 0);
         write(client_sock, mesg_back, mesg_back_length);
@@ -85,6 +98,7 @@ int server_action_rpl_comm_msg(
     {
         int ret = write(to_desc, mesg_buffer, mesg_length);
         unsigned char mesg_back[MESSAGE_LENGTH];
+        ret -= 12;
         int mesg_back_length = reply_comm_msg_sender(mesg_back, ret);
         write(client_sock, mesg_back, mesg_back_length);
         return ret;
@@ -112,7 +126,6 @@ int new_socket(uint16_t port)
     puts("Socket created.");
 #endif
     // sockaddr_in strcuture
-    struct sockaddr_in server;
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
     server.sin_port = htons(port);
@@ -213,6 +226,8 @@ void service(int client_sock)
         {
             case REQ_TIME:
                 server_action_rpl_time(client_sock, recv_buffer); break;
+            case REQ_HOSTIP:
+                server_action_rpl_host_ip(client_sock, recv_buffer); break;
             case REQ_HOSTNAME: 
                 server_action_rpl_hostname(client_sock, recv_buffer); break;
             case REQ_SOCK_ALL:
@@ -237,6 +252,7 @@ void service(int client_sock)
                 else {
                     printf("client %d not found.\n", client_sock);
                 }
+                pthread_exit(0);
                 return;
             }
             default: break;
