@@ -52,6 +52,18 @@ int request_time_msg(unsigned char *dest)
     return PROTOCOL_HEADER_LEN;
 }
 
+// Write host ip request mesage to dest
+int request_host_ip_msg(unsigned char *dest)
+{
+    // Write magic
+    *(uint16_t*)(dest)      = htons(MAGIC);
+    // Write body length
+    *(uint32_t*)(dest + 2)  = 0;
+    // Write type
+    *(uint16_t*)(dest + 6)  = htons(REQ_HOSTIP);
+    return PROTOCOL_HEADER_LEN;
+}
+
 // Write hostname request message to dest
 int request_hostname_msg(unsigned char *dest)
 {
@@ -145,18 +157,9 @@ int msg2content(unsigned char *dest, const unsigned char *src)
     return to;
 }
 
-void msg2length(unsigned char *dest, const unsigned char *src)
+int msg2length(const unsigned char *src)
 {
-    int length = ntohl(*(uint32_t*)(src+PROTOCOL_HEADER_LEN));
-    if(length==0)
-    {
-        sprintf((char*)dest, "Sending failed, nothing sent.\n");
-    }
-    else 
-    {
-        sprintf((char*)dest, "Sending succeeded, %d bytes sent.\n", length);
-    }
-    return;
+    return ntohl(*(uint32_t*)(src+PROTOCOL_HEADER_LEN));
 }
 
 // Write time reply message to dest
@@ -172,6 +175,20 @@ int reply_time_msg(unsigned char *dest)
     // Write body
     *(int32_t*)(dest + PROTOCOL_HEADER_LEN)    = htonl(now);
     return PROTOCOL_HEADER_LEN + sizeof(now);
+}
+
+// Write host ip reply message to dest
+int reply_host_ip_msg(unsigned char *dest, const unsigned char *src)
+{
+    // Write magic
+    *(uint16_t*)(dest)       = htons(MAGIC);
+    // Write body length
+    *(uint32_t*)(dest + 2)   = htonl(strlen((char*)src));
+    // Write type
+    *(uint16_t*)(dest + 6)   = htons(RPL_HOSTIP);
+    // Write body
+    strcpy((char*)(dest + PROTOCOL_HEADER_LEN), (char*)src);
+    return PROTOCOL_HEADER_LEN + strlen((char*)src);
 }
 
 // Write hostname reply message to dest
@@ -230,6 +247,15 @@ int msg2client_list(int *desc_list,
 
 // Convert the hostname reply message to real hostname
 int msg2hostname(unsigned char *dest, const unsigned char *src)
+{
+    strncpy((char*)dest, (const char*)src + PROTOCOL_HEADER_LEN, get_body_length(src));
+    dest[get_body_length(src)] = '\n';
+    dest[get_body_length(src)+1] = 0;
+    return strlen((char*)dest);
+}
+
+// Convert the host ip reply message to ip address
+int msg2hostip(unsigned char *dest, const unsigned char *src)
 {
     strncpy((char*)dest, (const char*)src + PROTOCOL_HEADER_LEN, get_body_length(src));
     dest[get_body_length(src)] = '\n';

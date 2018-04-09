@@ -20,23 +20,25 @@
 typedef enum {
     CLIENT_INFO     = 0x0000,
     REQ_TIME        = 0x0001,
-    REQ_HOSTNAME    = 0x0002,
-    REQ_SOCK_DESC   = 0x0003,
-    REQ_SOCK_ALL    = 0x0004,
-    REQ_CLIENT_IP   = 0x0005,
-    REQ_CLIENT_PORT = 0x0006,
-    REQ_SEND_MSG    = 0x0007,
-    REQ_DISCONNECT  = 0x0008,
-    REQ_BOUND       = 0x0009,   // This is just a boundary, not a flag
+    REQ_HOSTIP      = 0x0002,
+    REQ_HOSTNAME    = 0x0003,
+    REQ_SOCK_DESC   = 0x0004,
+    REQ_SOCK_ALL    = 0x0005,
+    REQ_CLIENT_IP   = 0x0006,
+    REQ_CLIENT_PORT = 0x0007,
+    REQ_SEND_MSG    = 0x0008,
+    REQ_DISCONNECT  = 0x0009,
+    REQ_BOUND       = 0x000A,   // This is just a boundary, not a flag
     RPL_TIME        = 0x0101,
-    RPL_HOSTNAME    = 0x0102,
-    RPL_SOCK_DESC   = 0x0103,
-    RPL_SOCK_ALL    = 0x0104,
-    RPL_CLIENT_IP   = 0x0105,
-    RPL_CLIENT_PORT = 0x0106,
-    RPL_SEND_MSG    = 0x0107,
-    RPL_SEND_SENDER = 0x0108,
-    RPL_BOUND       = 0x0109,   // This is just a boundary, not a flag
+    RPL_HOSTIP      = 0x0102,
+    RPL_HOSTNAME    = 0x0103,
+    RPL_SOCK_DESC   = 0x0104,
+    RPL_SOCK_ALL    = 0x0105,
+    RPL_CLIENT_IP   = 0x0106,
+    RPL_CLIENT_PORT = 0x0107,
+    RPL_SEND_MSG    = 0x0108,
+    RPL_SEND_SENDER = 0x0109,
+    RPL_BOUND       = 0x010A,   // This is just a boundary, not a flag
     UNKNOWN_TYPE    = 0xFFFF
 } MessageType;
 
@@ -82,6 +84,18 @@ int reply_time_msg(unsigned char *dest);
 // Message to time
 // The return value is the Unix time in int
 int msg2time(const unsigned char *src);
+
+// ==== Host IP ====
+// ---- Request format ----
+// [Header]
+// ---- Reply format ----
+// [Header] [char string Hostip]
+// Write host ip request message to dest
+int request_host_ip_msg(unsigned char *dest);
+// Write host ip reply message to dest
+int reply_host_ip_msg(unsigned char *dest, const unsigned char *src);
+// Message to host ip
+int msg2hostip(unsigned char *dest, const unsigned char *src);
 
 // ==== Hostname ====
 // ---- Request format ----
@@ -142,7 +156,7 @@ int reply_comm_msg(unsigned char *dest, int from_desc, const char *content);
 // The return value is the from/to descriptor
 int msg2content(unsigned char *dest, const unsigned char *src);
 // parse sent length and show status
-void msg2length(unsigned char *dest, const unsigned char *src);
+int msg2length(const unsigned char *src);
 
 
 // This function converts the receiving message to human reabable string
