@@ -19,8 +19,11 @@ int init(void)
 int new_socket(uint16_t port, const char *ip_addr)
 {
     int init_status;
-    if(!initialized) init_status = init();
-    if(init_status != SUCCEED_EXITCODE) return init_status;
+    if(!initialized) 
+    {
+        init_status = init();
+        if(init_status != SUCCEED_EXITCODE) return init_status;
+    }
     // Create socket
     int socket_desc = socket(AF_INET, SOCK_STREAM, 0);
     if(socket_desc == -1)
@@ -29,7 +32,7 @@ int new_socket(uint16_t port, const char *ip_addr)
         perror("Socket creation failed");
 #endif
         return FAILED_SOCKET_CREATION;
-    }
+    } 
 #ifdef CLIENT_OUTPUT
     puts("Socket created.");
 #endif
@@ -81,14 +84,37 @@ void receive_reply(const int socket_desc, const int output_desc)
     {
         // The function below is provided by protocol.h
         // which can convert the message to human readable string
-        // MessageType msg_type = 
+        MessageType msg_type = 
             interpret_raw_msg(mesg_buffer, recv_buffer);
         // If you want some more features, the returned MessageType value
         // can be useful.
         // ==== To be implemented (optional) ====
 
         // Here to write the string to the output device
-        write(output_desc, mesg_buffer, strlen((char*)mesg_buffer) + 1);
+        switch(msg_type)
+        {
+            case RPL_TIME:
+            case RPL_HOSTIP:
+            case RPL_HOSTNAME:
+            case RPL_SEND_SENDER:
+                write(output_desc, (char*)"Server: \0", 9);
+                write(output_desc, mesg_buffer, strlen((char*)mesg_buffer) + 1);
+                break;
+            case RPL_SEND_MSG:
+                write(output_desc, mesg_buffer, strlen((char*)mesg_buffer) + 1);
+                break;
+            case RPL_SOCK_ALL:
+                write(output_desc, (char*)"--------\n\0", 10);
+                write(output_desc, mesg_buffer, strlen((char*)mesg_buffer) + 1);
+                write(output_desc, (char*)"--------\n\0", 10);
+                break;
+            case RPL_CLIENT_IP:
+            case RPL_CLIENT_PORT:
+            case RPL_SOCK_DESC:
+            default:
+                // No implementation
+                break;
+        }
         received = 0;
     }
 }
@@ -106,6 +132,11 @@ MessageType interpret_raw_msg(unsigned char *dest, const unsigned char *src)
             strcpy((char*)dest, ctime(&msg_time));
             return RPL_TIME;
         }
+        case RPL_HOSTIP:
+        {
+            msg2hostip(dest, src);
+            return RPL_HOSTIP;
+        }
         case RPL_HOSTNAME:
             msg2hostname(dest, src);
             return RPL_HOSTNAME;
@@ -119,7 +150,7 @@ MessageType interpret_raw_msg(unsigned char *dest, const unsigned char *src)
             int offset=0;
             for(int i = 0; i < n; i++)
             {
-                sprintf((char*)dest+offset, "%d: %s %s @ %d\n",
+                sprintf((char*)dest+offset, "Client %d: %s %s @ %d\n",
                 desc_list[i],
                 name_list[i],
                 inet_ntoa(socket_addr_list[i].sin_addr),
@@ -134,7 +165,7 @@ MessageType interpret_raw_msg(unsigned char *dest, const unsigned char *src)
         {
             unsigned char content_buffer[MESSAGE_LENGTH];
             int from = msg2content(content_buffer, src);
-            sprintf((char*)dest, "%d: %s\n", from, content_buffer);
+            sprintf((char*)dest, "\nClient %d: %s\n", from, content_buffer);
             return RPL_SEND_MSG;
         }
         case RPL_SEND_SENDER:
@@ -142,7 +173,15 @@ MessageType interpret_raw_msg(unsigned char *dest, const unsigned char *src)
 #ifdef PROTOCOL_TEST
             printf("reply received.\n");
 #endif
-            msg2length(dest, src);
+            int length = msg2length(src);
+            if(length==0)
+            {
+                sprintf((char*)dest, "Sending failed, nothing sent.\n");
+            }
+            else 
+            {
+                sprintf((char*)dest, "Sending succeeded, %d bytes sent.\n", length);
+            }
             return RPL_SEND_SENDER;
         }
         case RPL_BOUND:         return RPL_BOUND;
@@ -156,6 +195,13 @@ int request_hostname(int socket_desc)
 {
     unsigned char buffer[MESSAGE_LENGTH];
     int mesg_length = request_hostname_msg(buffer);
+    return send(socket_desc, buffer, mesg_length, 0);
+}
+
+int request_host_ip(int socket_desc)
+{
+    unsigned char buffer[MESSAGE_LENGTH];
+    int mesg_length = request_host_ip_msg(buffer);
     return send(socket_desc, buffer, mesg_length, 0);
 }
 
