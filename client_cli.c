@@ -28,7 +28,8 @@ void cli_init()
     io_lock = 0;
 }
 
-void* start_listen()
+// sub thread to receive from server
+void* start_recv()
 {
 #ifdef PTHREAD_TEST
     printf("client listen running\n");
@@ -43,6 +44,7 @@ void* start_listen()
     pthread_exit(0);
 }
 
+// process connect order and create thread receiving from server
 int cli_connect() 
 {   
     printf("Please input IP address to connect\n");
@@ -66,7 +68,7 @@ int cli_connect()
         printf("Connected.\n");
 
         pthread_t pid;
-        pthread_create(&pid, NULL, start_listen, NULL);
+        pthread_create(&pid, NULL, start_recv, NULL);
 
         int ret = show_welcome_connected(socket_desc);
         if(ret == INPUT_DISCONNECT) {
@@ -78,6 +80,7 @@ int cli_connect()
     }
 }  
 
+// main routine of client, process input at main menu
 int process_input_menu() 
 {
     scanf("%s", s);
