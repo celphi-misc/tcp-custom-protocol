@@ -45,8 +45,18 @@ void* start_listen()
 
 int cli_connect() 
 {   
+    printf("Please input IP address to connect\n");
+    printf("Currently useable 127.0.0.1: ");
+    char ip_address[10];
+    scanf("%s", ip_address);
+
+    printf("Please input Port to connect\n");
+    printf("Currently usable 8888: ");
+    int port;
+    scanf("%d", &port);
+    
     printf("Connecting .. \n");
-    socket_desc = new_socket(8888, "127.0.0.1");
+    socket_desc = new_socket(port, (char*)ip_address);
     if(socket_desc < 0){
         printf("Socket connect failed, please try again.\n");
         return process_input_menu();
