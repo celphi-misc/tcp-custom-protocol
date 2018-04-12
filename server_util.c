@@ -193,7 +193,11 @@ int accept_client(int sock_desc, int *client_sock)
         unsigned char hostname[HOSTNAME_LENGTH];
         struct sockaddr_in client_socket_addr;
         msg2client_info(hostname, &client_socket_addr, recv_buffer);
-        add_client(*client_sock, (char*)hostname, &client_socket_addr);
+//        if(client_socket_addr.sin_addr.s_addr!= server.sin_addr.s_addr || client_socket_addr.sin_port != server.sin_port)
+//        {
+//            printf("Fault: Client-side resovling fault.\n");
+//       }
+        add_client(*client_sock, (char*)hostname, &client);
         return SUCCEED_EXITCODE;
     }
     return FAILED_CONNECTING;

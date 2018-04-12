@@ -1,7 +1,7 @@
 # Compiler
 CC = gcc
 # Compiling options, -Wall for "Warning all"
-OPTIONS = -g -c -Wall -std=c99
+OPTIONS = -c -Wall -std=c99
 HEADERS = *.h
 
 # A list of executable files, used for cleaning up

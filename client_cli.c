@@ -48,12 +48,12 @@ void* start_recv()
 int cli_connect() 
 {   
     printf("Please input IP address to connect\n");
-    printf("Currently useable 127.0.0.1: ");
+    printf("(127.0.0.1 for local test): ");
     char ip_address[10];
     scanf("%s", ip_address);
 
     printf("Please input Port to connect\n");
-    printf("Currently usable 8888: ");
+    printf("(default 4531): ");
     int port;
     scanf("%d", &port);
     
