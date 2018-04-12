@@ -1,5 +1,2 @@
 .vscode
 *.o
-server
-client
-test
