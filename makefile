@@ -1,7 +1,7 @@
 # Compiler
 CC = gcc
 # Compiling options, -Wall for "Warning all"
-OPTIONS = -g -c -Wall
+OPTIONS = -g -c -Wall -std=c99
 HEADERS = *.h
 
 # A list of executable files, used for cleaning up
@@ -21,6 +21,7 @@ client: $(CLIENT_RECEIPE)
 
 %.o: %.c  $(HEADERS)
 	$(CC) $(OPTIONS) $<
+
 
 # Phony target for cleaning up
 .PHONY: clean
