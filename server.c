@@ -29,9 +29,32 @@ void* start_accept(void* server_desc)
     pthread_exit(0);
 }
 
+int getPort(const char* str) 
+{
+    char c;
+    int num = 0;
+    while((c=getchar())>='0'&&(c<='9')){
+        num = num * 10 + c - '0';
+    }
+    return num;
+}
+
 int main(int argc, char **argv)
 {
-    int server_desc = new_socket(8888);
+    int port;
+    if(argc>1)
+    {
+        port = getPort(argv[1]);
+        if(port<=1024 && port >=65535) 
+        {
+            printf("port number invalid, using default port 8888\n");
+            port = 8888;
+        }
+    }
+    else {
+        port = 8888;
+    }
+    int server_desc = new_socket(port);
     if(server_desc < 0) return server_desc;
     pthread_t pid;
     pthread_create(&pid, NULL, start_accept, &server_desc);
