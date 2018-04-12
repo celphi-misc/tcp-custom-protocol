@@ -31,10 +31,11 @@ void* start_accept(void* server_desc)
 
 int getPort(const char* str) 
 {
-    char c;
-    int num = 0;
-    while((c=getchar())>='0'&&(c<='9')){
-        num = num * 10 + c - '0';
+    int length = strlen(str);
+    int num;
+    for(int i = 0; i<length; i++)
+    {
+        num = num * 10 +str[i] - '0';
     }
     return num;
 }
@@ -45,7 +46,7 @@ int main(int argc, char **argv)
     if(argc>1)
     {
         port = getPort(argv[1]);
-        if(port<=1024 && port >=65535) 
+        if(port<=1024 || port >=65535) 
         {
             printf("port number invalid, using default port 8888\n");
             port = 8888;
