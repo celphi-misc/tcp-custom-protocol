@@ -48,12 +48,12 @@ int main(int argc, char **argv)
         port = getPort(argv[1]);
         if(port<=1024 || port >=65535) 
         {
-            printf("port number invalid, using default port 8888\n");
-            port = 8888;
+            printf("port number invalid, using default port 4531\n");
+            port = 4531;
         }
     }
     else {
-        port = 8888;
+        port = 4531;
     }
     int server_desc = new_socket(port);
     if(server_desc < 0) return server_desc;
