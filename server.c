@@ -32,7 +32,7 @@ void* start_accept(void* server_desc)
 int getPort(const char* str) 
 {
     int length = strlen(str);
-    int num;
+    int num=0;
     for(int i = 0; i<length; i++)
     {
         num = num * 10 +str[i] - '0';
